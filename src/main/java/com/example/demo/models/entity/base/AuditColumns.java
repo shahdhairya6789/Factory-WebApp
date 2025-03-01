@@ -12,13 +12,14 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class AuditColumns {
 
     @NotNull
-    @Column(name = "created_at")
-    private Timestamp createdAt;
+    @Column(name = "created_at",
+            columnDefinition = "timestamp default CURRENT_TIMESTAMP")
+    private Timestamp createdAt = new Timestamp(System.currentTimeMillis());
 
     @NotNull
     @Column(
             name = "modified_at",
             columnDefinition = "timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     @UpdateTimestamp
-    private Timestamp modifiedAt;
+    private Timestamp modifiedAt = new Timestamp(System.currentTimeMillis());
 }

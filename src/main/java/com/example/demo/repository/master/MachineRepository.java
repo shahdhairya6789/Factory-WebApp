@@ -7,4 +7,5 @@ import com.example.demo.models.entity.master.Machine;
 
 @Repository
 public interface MachineRepository extends JpaRepository<Machine, Long> {
+    Machine findById(int machineId);
 }

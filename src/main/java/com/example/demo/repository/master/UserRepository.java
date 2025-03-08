@@ -10,4 +10,8 @@ import com.example.demo.models.entity.master.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmail(String email);
+
+    Optional<User> findByEmailOrMobileNumber(String email, String mobileNumber);
+
+    Optional<User> findByMobileNumber(String mobileNumber);
 }

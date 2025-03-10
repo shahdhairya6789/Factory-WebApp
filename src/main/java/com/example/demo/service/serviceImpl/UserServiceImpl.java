@@ -64,18 +64,21 @@ public class UserServiceImpl implements UserService {
     public CommonResponse<User> register(SignUpRequestObject signUpRequestObject) {
         LOGGER.debug("In UserServiceImpl::register for email {}", signUpRequestObject.getEmail());
 
+        String message;
         Optional<User> optionalUser = userRepository.findByMobileNumber(signUpRequestObject.getMobileNumber());
         User user;
 
         // validate if the user already exists
         if (optionalUser.isPresent()) {
             user = optionalUser.get();
+            message = ApplicationConstants.SuccessMessage.USER_ALREADY_EXISTS;
         } else {
             int otp = CommonUtils.generateOTP();
             // save user details
             user = User.builder()
                     .email(signUpRequestObject.getEmail())
                     .password(bCryptPasswordEncoder.encode(signUpRequestObject.getPassword()))
+                    .mobileNumber(signUpRequestObject.getMobileNumber())
                     .name(signUpRequestObject.getName())
                     .otp(String.valueOf(otp))
                     .build();
@@ -83,9 +86,14 @@ public class UserServiceImpl implements UserService {
             // call external service to send OTP to mobile number
             sendSMS.sendSms(signUpRequestObject.getMobileNumber(), otp);
             user = userRepository.save(user);
+            message = ApplicationConstants.SuccessMessage.USER_REGISTERED;
         }
+
+        user.setOtp(null);
+        user.setCreatedAt(null);
+        user.setModifiedAt(null);
         LOGGER.debug("Out UserServiceImpl::register for email {}", signUpRequestObject.getEmail());
-        return new CommonResponse<>(user, ApplicationConstants.SuccessMessage.USER_REGISTERED);
+        return new CommonResponse<>(user, message);
     }
 
     /**

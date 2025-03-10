@@ -3,7 +3,7 @@ package com.example.demo.constants;
 public class ApplicationConstants {
 
     public static final String OTP_MESSAGE = "Otp for login is %s";
-    public static final String OTP_SENDER = "Steve Smith";
+    public static final String OTP_SENDER = "Jeet";
 
     // Message for UI
     public static class SuccessMessage {
@@ -12,6 +12,7 @@ public class ApplicationConstants {
         public static final String USER_LOGIN = "User logged in successfully!";
         public static final String OTP_SENT_AGAIN = "Otp re-sent to user successfully!";
         public static final String PASSWORD_SET_SUCCESSFULLY = "Password set successfully!";
+        public static final String USER_ALREADY_EXISTS = "User already exists!";
     }
 
     // Class for all the validation message

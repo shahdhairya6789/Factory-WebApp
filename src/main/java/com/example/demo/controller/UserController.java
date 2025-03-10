@@ -20,7 +20,7 @@ import com.example.demo.models.entity.master.User;
 import com.example.demo.service.UserService;
 
 @RestController
-@RequestMapping("/v1/user")
+@RequestMapping("/v1/users")
 public class UserController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);

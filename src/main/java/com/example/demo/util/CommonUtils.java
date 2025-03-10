@@ -15,6 +15,6 @@ public class CommonUtils {
     }
 
     public static int generateOTP(){
-        return RandomGenerator.getDefault().nextInt();
+        return RandomGenerator.getDefault().nextInt(1, 10000);
     }
 }

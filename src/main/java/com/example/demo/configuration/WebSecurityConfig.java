@@ -37,7 +37,7 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(
                         request -> request
-                                .requestMatchers("register","login").permitAll()
+                                .requestMatchers("/v1/users/register","/v1/users/login").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())

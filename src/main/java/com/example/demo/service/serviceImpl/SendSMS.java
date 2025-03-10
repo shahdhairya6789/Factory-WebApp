@@ -6,19 +6,22 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.constants.ApplicationConstants;
 
 @Service
 public class SendSMS {
+    private Logger logger = LoggerFactory.getLogger(SendSMS.class);
 
     public void sendSms(String phoneNumber, int otp) {
         try {
             // Construct data
             String apiKey = "apikey=" + "NzA2NTY5NmI1NjM4NGY3NTQxMzk1MTU0NDY0NDQ4NGQ=";
-            String message = "&message=" + ApplicationConstants.OTP_MESSAGE;
-            String sender = "&sender=" + String.format(ApplicationConstants.OTP_SENDER, otp);
+            String message = "&message=" + String.format(ApplicationConstants.OTP_MESSAGE , otp);
+            String sender = "&sender=" + ApplicationConstants.OTP_SENDER;
             String numbers = "&numbers=" + phoneNumber;
 
             // Send data
@@ -34,6 +37,7 @@ public class SendSMS {
             while ((line = rd.readLine()) != null) {
                 stringBuffer.append(line);
             }
+            logger.info(stringBuffer.toString());
             rd.close();
 
         } catch (Exception e) {

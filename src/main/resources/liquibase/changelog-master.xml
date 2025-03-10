@@ -6,4 +6,6 @@
     <include file="/liquibase/changelog/DatabaseSetup.sql"/>
     <include file="/liquibase/changelog/AddPasswordColumnForUser.sql"/>
     <include file="/liquibase/changelog/AddTokenColumnForUserTable.sql"/>
+    <include file="/liquibase/changelog/AddOTPColumnForUser.sql"/>
+    <include file="/liquibase/changelog/Remove Null Conditions from Users.sql"/>
 </databaseChangeLog>

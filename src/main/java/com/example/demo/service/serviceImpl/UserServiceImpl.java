@@ -1,11 +1,14 @@
 package com.example.demo.service.serviceImpl;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +39,16 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtService jwtService;
     private final SendSMS sendSMS;
+
+    @Value("${jwt.expiration}")
+    private String jwtExpirationStr;
+
+    private long jwtExpiration;
+
+    @PostConstruct
+    public void init() {
+        jwtExpiration = Long.parseLong(jwtExpirationStr); // Convert String to Long
+    }
 
     public UserServiceImpl(UserRepository userRepository,
                            BCryptPasswordEncoder bCryptPasswordEncoder,
@@ -142,13 +155,11 @@ public class UserServiceImpl implements UserService {
         if (!bCryptPasswordEncoder.matches(signinRequest.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException(INVALID_CREDENTIALS);
         }
-        // validate if the token has expired
-        if (jwtService.isTokenExpired(authenticationToken)) {
-            throw new IllegalArgumentException(TOKEN_EXPIRED);
-        }
 
         // prepare response
-        responseMap.put("token", authenticationToken);
+        responseMap.put("token", jwtService.generateToken(user.getMobileNumber()));
+        responseMap.put("expires_in", System.currentTimeMillis() + jwtExpiration);
+        responseMap.put("expires_at", new Date(System.currentTimeMillis() + jwtExpiration));
         responseMap.put("user", user);
         LOGGER.debug("Out UserServiceImpl::loginByEmailOrPhone");
         return new CommonResponse<>(responseMap, USER_LOGIN);

@@ -21,6 +21,7 @@ public class ApplicationConstants {
         // Verify User Related Validation Message
         public static final String INVALID_USER_ID = "UserId cannot be null or empty!";
         public static final String INVALID_OTP = "OTP cannot be null or empty!";
+        public static final String INVALID_MOBILE_NUMBER = "Mobile number cannot be null or empty!";
 
         // Sign Up Related Validation message
         public static final String NAME_REQUIRED_MSG = "Name is required!";

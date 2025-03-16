@@ -7,8 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static com.example.demo.constants.ApplicationConstants.ValidationMessage.INVALID_OTP;
-import static com.example.demo.constants.ApplicationConstants.ValidationMessage.INVALID_USER_ID;
+import static com.example.demo.constants.ApplicationConstants.ValidationMessage.*;
 
 @Data
 @AllArgsConstructor

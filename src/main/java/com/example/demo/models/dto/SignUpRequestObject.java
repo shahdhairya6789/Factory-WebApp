@@ -19,10 +19,10 @@ import static com.example.demo.constants.ApplicationConstants.ValidationMessage.
 @NoArgsConstructor
 @Builder
 public class SignUpRequestObject {
-//    @NotNull(message = NAME_REQUIRED_MSG)
+    @NotNull(message = NAME_REQUIRED_MSG)
     private String name;
-//    @NotNull
-//    @Size(min = 10, max = 10, message = PHONE_RESTRICTION_MSG)
+    @NotNull
+    @Size(min = 10, max = 10, message = PHONE_RESTRICTION_MSG)
     private String mobileNumber;
 //    @NotNull
 //    @Email(message = EMAIL_RESTRICTION_MSG)

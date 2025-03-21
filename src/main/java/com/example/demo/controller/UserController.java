@@ -1,5 +1,8 @@
 package com.example.demo.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.security.Principal;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -39,7 +42,9 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public CommonResponse<Map<String, Object>> login(@RequestBody SigninRequest user) {
+    public CommonResponse<Map<String, Object>> login(HttpServletRequest httpServletRequest,
+                                                     Principal principal,
+                                                     @RequestBody SigninRequest user) {
         LOGGER.debug("In UserController::login for user-identification {}", user.getUserIdentification());
         CommonResponse<Map<String, Object>> commonResponse = userService.loginByEmailOrPhone(user);
         LOGGER.debug("Out UserController::login");

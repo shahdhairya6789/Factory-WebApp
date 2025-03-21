@@ -31,15 +31,15 @@ public class JwtService {
     private Environment env;
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtService.class);
 
-    public String generateToken(String email) {
-        LOGGER.debug("In JwtService.generateToken() for email {}", email);
+    public String generateToken(String mobileNumber) {
+        LOGGER.debug("In JwtService.generateToken() for mobileNumber {}", mobileNumber);
         long expirationDuration = Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.expiration")));
 
         String token = Jwts
                 .builder()
                 .claims()
                 .add(new HashMap<>())
-                .subject(email)
+                .subject(mobileNumber)
                 .issuer("DCB")
                 .issuedAt(new Date(System.currentTimeMillis()))
                 // replace expiration with env value
@@ -48,7 +48,7 @@ public class JwtService {
                 .signWith(generateKey())
                 .compact();
 
-        LOGGER.debug("Out JwtService.generateToken() for email {} with token {}", email, token);
+        LOGGER.debug("Out JwtService.generateToken() for mobileNumber {} with token {}", mobileNumber, token);
         return token;
     }
 

@@ -1,6 +1,7 @@
 package com.example.demo.models.entity.mapping;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,7 +24,7 @@ public class UserRole extends AuditColumns {
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
 }

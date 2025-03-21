@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.demo.constants.ApplicationConstants;
+import com.example.demo.models.CommonResponse;
+import com.example.demo.models.dto.CreateMachineVO;
 import com.example.demo.models.entity.master.Machine;
 import com.example.demo.repository.master.MachineRepository;
 
@@ -23,38 +27,56 @@ public class MachineService {
         this.machineRepository = machineRepository;
     }
 
-    public List<Machine> getAllMachines() {
+    public CommonResponse<List<Machine>> getAllMachines() {
         LOGGER.info("In MachineService.getAllMachines");
-        List<Machine> machines = machineRepository.findAll();
+        List<Machine> machines = machineRepository.findByIsActiveTrue();
         LOGGER.info("Out MachineService.getAllMachines");
-        return machines;
+        return new CommonResponse<>(machines, ApplicationConstants.SuccessMessage.MACHINE_LIST_FETCHED_SUCCESSFULLY);
     }
 
-    public Machine getMachineById(int id) {
+    public CommonResponse<Machine> getMachineById(int id) {
         LOGGER.info("In MachineService.getMachineById");
         Machine machine = machineRepository.findById(id);
         LOGGER.info("Out MachineService.getMachineById");
-        return machine;
+        return new CommonResponse<>(machine, ApplicationConstants.SuccessMessage.MACHINE_DETAILS_SUCCESSFULLY);
     }
 
-    public void saveMachineDetails(Machine machine) {
+    public CommonResponse<Machine> saveMachineDetails(CreateMachineVO createMachineVO) {
         LOGGER.info("In MachineService.saveMachineDetails");
-        machineRepository.save(machine);
+        Machine machine = new Machine();
+        machine.setName(createMachineVO.getName());
+        machine.setArea(createMachineVO.getArea());
+        machine.setHeads(createMachineVO.getHeads());
+        machine.setActive(true);
+        machine = machineRepository.save(machine);
         LOGGER.info("Out MachineService.saveMachineDetails");
+        return new CommonResponse<>(machine, ApplicationConstants.SuccessMessage.MACHINE_SAVED_SUCCESSFULLY);
     }
 
-    public void updateMachineDetails(int id, Machine machine) {
+    public CommonResponse<Machine> updateMachineDetails(int id, CreateMachineVO createMachineVO) {
         LOGGER.info("In MachineService.updateMachineDetails");
-        machine = new Machine(machineRepository.getReferenceById((long) id));
-        saveMachineDetails(machine);
+        Machine machine = machineRepository.findById(id);
+        if (Objects.isNull(machine) || !machine.isActive()) {
+            throw new IllegalArgumentException(ApplicationConstants.ValidationMessage.INVALID_MACHINE_ID_MESSAGE);
+        }
+        machine.setId(machine.getId());
+        machine.setName(Objects.isNull(createMachineVO.getName()) ? machine.getName() : createMachineVO.getName());
+        machine.setArea(Objects.isNull(createMachineVO.getArea()) ? machine.getArea() : createMachineVO.getArea());
+        machine.setHeads(Objects.isNull(createMachineVO.getHeads()) ? machine.getHeads() : createMachineVO.getHeads());
+        machine = machineRepository.save(machine);
         LOGGER.info("Out MachineService.updateMachineDetails");
+        return new CommonResponse<>(machine, ApplicationConstants.SuccessMessage.MACHINE_UPDATED_SUCCESSFULLY);
     }
 
-    public void deleteMachineDetails(int id) {
+    public CommonResponse<String> deleteMachineDetails(int id) {
         LOGGER.info("In MachineService.deleteMachineDetails");
-        Machine machine = machineRepository.getReferenceById((long) id);
+        Machine machine = machineRepository.findById(id);
+        if (Objects.isNull(machine) || !machine.isActive()) {
+            throw new IllegalArgumentException(ApplicationConstants.ValidationMessage.INVALID_MACHINE_ID_MESSAGE);
+        }
         machine.setActive(Boolean.FALSE);
-        saveMachineDetails(machine);
+        machineRepository.save(machine);
         LOGGER.info("Out MachineService.deleteMachineDetails");
+        return new CommonResponse<>(ApplicationConstants.SuccessMessage.MACHINE_DELETED_SUCCESSFULLY);
     }
 }

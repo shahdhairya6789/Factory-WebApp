@@ -14,6 +14,7 @@ public class ApplicationConstants {
         public static final String PASSWORD_SET_SUCCESSFULLY = "Password set successfully!";
         public static final String USER_ALREADY_EXISTS = "User already exists!";
         public static final String MACHINE_LIST_FETCHED_SUCCESSFULLY = "Machine list fetched successfully!";
+        public static final String ROLE_LIST_FETCHED_SUCCESSFULLY = "Role list fetched successfully!";
         public static final String MACHINE_DETAILS_SUCCESSFULLY = "Machine details successfully!";
         public static final String MACHINE_SAVED_SUCCESSFULLY = "Machine details saved successfully!";
         public static final String MACHINE_UPDATED_SUCCESSFULLY = "Machine details updated successfully!";

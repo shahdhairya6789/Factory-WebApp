@@ -16,13 +16,8 @@ import javax.crypto.SecretKey;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.function.Function;
-
-import com.example.demo.models.entity.master.User;
-import com.example.demo.service.MachineService;
 
 @Service
 public class JwtService {

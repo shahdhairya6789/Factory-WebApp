@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.models.CommonResponse;
 import com.example.demo.models.dto.CreateMachineVO;
 import com.example.demo.models.entity.master.Machine;
-import com.example.demo.service.MachineService;
+import com.example.demo.service.serviceImpl.MachineService;
 
 /**
  * The controller for the machines.

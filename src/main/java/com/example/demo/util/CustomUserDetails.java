@@ -12,14 +12,16 @@ import com.example.demo.models.entity.master.User;
 public class CustomUserDetails implements UserDetails {
 
     private final User user;
+    private final Collection<? extends GrantedAuthority> authorities;
 
-    public CustomUserDetails(User user) {
+    public CustomUserDetails(User user, Collection<? extends GrantedAuthority> authorities) {
+        this.authorities = authorities;
         this.user = user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("USER"));
+        return this.authorities;
     }
 
     @Override

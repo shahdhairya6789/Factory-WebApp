@@ -1,9 +1,13 @@
 package com.example.demo.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.security.Principal;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +34,7 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN', 'EMPLOYEE', '')")
     @PostMapping("/register")
     public CommonResponse<User> register(@RequestBody SignUpRequestObject user) {
         LOGGER.debug("In UserController::register for email {}", user.getEmail());
@@ -38,14 +43,18 @@ public class UserController {
         return commonResponse;
     }
 
+    @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN', 'EMPLOYEE', '')")
     @PostMapping("/login")
-    public CommonResponse<Map<String, Object>> login(@RequestBody SigninRequest user) {
+    public CommonResponse<Map<String, Object>> login(HttpServletRequest httpServletRequest,
+                                                     Principal principal,
+                                                     @RequestBody SigninRequest user) {
         LOGGER.debug("In UserController::login for user-identification {}", user.getUserIdentification());
         CommonResponse<Map<String, Object>> commonResponse = userService.loginByEmailOrPhone(user);
         LOGGER.debug("Out UserController::login");
         return commonResponse;
     }
 
+    @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN', 'EMPLOYEE', '')")
     @PostMapping("/verify-otp")
     public CommonResponse<User> verifyOtp(@RequestBody VerifyOtpRequestObject verifyOtpRequestObject) {
         LOGGER.debug("In UserController::verifyOtp for userID {}", verifyOtpRequestObject.getUserId());
@@ -54,6 +63,7 @@ public class UserController {
         return commonResponse;
     }
 
+    @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN', 'EMPLOYEE', '')")
     @GetMapping("/{userId}/resend-otp")
     public CommonResponse<String> resendOtp(@PathVariable("userId") int userId){
         LOGGER.debug("In UserController::resendOtp for userID {}", userId);
@@ -62,6 +72,7 @@ public class UserController {
         return commonResponse;
     }
 
+    @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN', 'EMPLOYEE', '')")
     @PostMapping("/reset-password")
     public CommonResponse<User> resetPassword(@RequestBody ResetPassword resetPassword) {
         LOGGER.debug("In UserController::resetPassword for userID {}", resetPassword.getUserId());

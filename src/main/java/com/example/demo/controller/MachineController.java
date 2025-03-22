@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.models.CommonResponse;
+import com.example.demo.models.dto.CreateMachineVO;
 import com.example.demo.models.entity.master.Machine;
-import com.example.demo.service.MachineService;
+import com.example.demo.service.serviceImpl.MachineService;
 
 /**
  * The controller for the machines.
@@ -32,42 +35,49 @@ public class MachineController {
         this.machineService = machineService;
     }
 
+    @PreAuthorize("hasAnyAuthority('MERCHANT','ADMIN', 'EMPLOYEE')")
     @GetMapping
-    public List<Machine> getMachines() {
+    public CommonResponse<List<Machine>> getMachines() {
         LOGGER.info("In MachineController.getMachines");
-        List<Machine> machineList = machineService.getAllMachines();
+        CommonResponse<List<Machine>> machineListResponse = machineService.getAllMachines();
         LOGGER.info("Out MachineController.getMachines");
-        return machineList;
+        return machineListResponse;
     }
 
+    @PreAuthorize("hasAnyAuthority('MERCHANT','ADMIN','EMPLOYEE')")
     @GetMapping("/{id}")
-    public Machine getMachine(@PathVariable Integer id) {
+    public CommonResponse<Machine> getMachine(@PathVariable Integer id) {
         LOGGER.info("In MachineController.getMachine");
-        Machine machine = machineService.getMachineById(id);
+        CommonResponse<Machine> machine = machineService.getMachineById(id);
         LOGGER.info("Out MachineController.getMachine");
         return machine;
     }
 
+    @PreAuthorize("hasAnyAuthority('MERCHANT','ADMIN')")
     @PostMapping
-    public Machine createMachine(@RequestBody Machine machine) {
+    public CommonResponse<Machine> createMachine(@RequestBody CreateMachineVO createMachineVO) {
         LOGGER.info("In MachineController.createMachine");
-        machineService.saveMachineDetails(machine);
+        CommonResponse<Machine> machine = machineService.saveMachineDetails(createMachineVO);
         LOGGER.info("Out MachineController.createMachine");
         return machine;
     }
 
-    @PutMapping
-    public Machine updateMachine(@RequestBody Machine machine) {
+    @PreAuthorize("hasAnyAuthority('MERCHANT','ADMIN')")
+    @PutMapping("/{id}")
+    public CommonResponse<Machine> updateMachine(@PathVariable Integer id,
+                                                 @RequestBody CreateMachineVO createMachineVO) {
         LOGGER.info("In MachineController.updateMachine");
-        machineService.updateMachineDetails(1, machine);
+        CommonResponse<Machine> machine = machineService.updateMachineDetails(id, createMachineVO);
         LOGGER.info("Out MachineController.updateMachine");
         return machine;
     }
 
+    @PreAuthorize("hasAnyAuthority('MERCHANT','ADMIN')")
     @DeleteMapping("/{id}")
-    public void deleteMachine(@PathVariable Integer id) {
+    public CommonResponse<String> deleteMachine(@PathVariable Integer id) {
         LOGGER.info("In MachineController.deleteMachine");
-        machineService.deleteMachineDetails(id);
+        CommonResponse<String> response = machineService.deleteMachineDetails(id);
         LOGGER.info("Out MachineController.deleteMachine");
+        return response;
     }
 }

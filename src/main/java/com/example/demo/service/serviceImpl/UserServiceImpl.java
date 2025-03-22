@@ -125,7 +125,7 @@ public class UserServiceImpl implements UserService {
         if (CommonUtils.checkValueAbsent(user.getOtp(), String.valueOf(verifyOtpRequestObject.getOtp()))) {
             throw new IllegalArgumentException(UNMATCHED_OTP);
         }
-        String authenticationToken = jwtService.generateToken(user.getEmail());
+        String authenticationToken = jwtService.generateToken(user.getMobileNumber());
         user.setLoginToken(authenticationToken);
         user = userRepository.save(user);
         LOGGER.debug("Out UserServiceImpl::verify");

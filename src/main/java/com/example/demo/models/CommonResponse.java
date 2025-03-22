@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -32,19 +34,14 @@ public class CommonResponse<T> {
         this.errorObject = Collections.singletonList(errorObject);
     }
 
-    public CommonResponse(List<ErrorObject> errorObject, String message) {
-        this.errorObject = errorObject;
-        this.message = message;
-    }
-
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ErrorObject {
-        private String error;
-        private String reason;
-        private String field;
+        private String errorMsg;
+        private String uri;
+        private HttpStatus status;
     }
 }

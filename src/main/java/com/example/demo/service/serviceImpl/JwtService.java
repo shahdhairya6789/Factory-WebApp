@@ -14,9 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -26,14 +24,15 @@ public class JwtService {
     private Environment env;
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtService.class);
 
-    public String generateToken(String mobileNumber) {
+    public String generateToken(String mobileNumber, List<String> roles) {
         LOGGER.debug("In JwtService.generateToken() for mobileNumber {}", mobileNumber);
         long expirationDuration = Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.expiration")));
+        Map<String, Object> claims = Map.of("roles", roles);   // Add roles as claims
 
         String token = Jwts
                 .builder()
                 .claims()
-                .add(new HashMap<>())
+                .add(claims)
                 .subject(mobileNumber)
                 .issuer("DCB")
                 .issuedAt(new Date(System.currentTimeMillis()))

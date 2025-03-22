@@ -20,6 +20,7 @@ import com.example.demo.models.entity.master.User;
 import com.example.demo.repository.mapping.UserRoleRepository;
 import com.example.demo.repository.master.UserRepository;
 import com.example.demo.util.CustomUserDetails;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class CustomUserDetailsService implements UserDetailsService {
@@ -33,17 +34,17 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String mobileNumber) throws UsernameNotFoundException {
         // Need to check how to throw exception if the user by mobileNumber doesn't exist
         Optional<User> user = userRepository.findByMobileNumber(mobileNumber);
         if (user.isEmpty()) {
             throw new UsernameNotFoundException(ApplicationConstants.ErrorMessage.USER_NOT_FOUND);
         }
-        List<UserRole> userRoles = userRoleRepository.findByUserId(user.get().getId());
 
-        List<GrantedAuthority> authorities = userRoles
+        List<GrantedAuthority> authorities = user.get().getRoles()
                 .stream()
-                .map(userRole -> new SimpleGrantedAuthority(Role.RoleValues.fetchById(userRole.getRole().getId()).toString()))
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toList());
 
         return new org.springframework.security.core.userdetails.User(user.get().getMobileNumber(), user.get().getPassword(), authorities);

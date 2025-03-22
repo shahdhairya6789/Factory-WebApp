@@ -1,11 +1,7 @@
 package com.example.demo.models.entity.master;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import com.example.demo.models.entity.constant.Role;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +11,12 @@ import lombok.NoArgsConstructor;
 import com.example.demo.models.entity.base.AuditColumns;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -30,7 +32,7 @@ public class User extends AuditColumns {
     private String name;
     @JsonIgnore
     private String password;
-    private boolean isActive;
+    private int isActive;
     private String email;
     private String mobileNumber;
     private String loginToken;
@@ -39,6 +41,18 @@ public class User extends AuditColumns {
     @ManyToOne
     @JoinColumn(name = "manager_id", referencedColumnName = "id")
     private User manager;
+
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(
+            name = "tblt_user_role_mapping",
+            joinColumns = { @JoinColumn(name = "user_id", referencedColumnName = "id") },
+            inverseJoinColumns = { @JoinColumn(name = "role_id", referencedColumnName = "id") }
+    )
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+    @BatchSize(size = 20)
+    private Set<Role> roles = new HashSet<>();
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "created_by_user_id", referencedColumnName = "id")

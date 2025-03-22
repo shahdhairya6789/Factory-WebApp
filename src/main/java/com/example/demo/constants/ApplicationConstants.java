@@ -19,6 +19,7 @@ public class ApplicationConstants {
         public static final String MACHINE_SAVED_SUCCESSFULLY = "Machine details saved successfully!";
         public static final String MACHINE_UPDATED_SUCCESSFULLY = "Machine details updated successfully!";
         public static final String MACHINE_DELETED_SUCCESSFULLY = "Machine details deleted successfully!";
+        public static final String ROLES_FETCHED_SUCCESSFULLY = "Roles fetch successfully!";
     }
 
     // Class for all the validation message

@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import com.example.demo.models.entity.base.AuditColumns;
 
@@ -36,13 +37,26 @@ public class Role extends AuditColumns {
     @Getter
     @AllArgsConstructor
     public enum RoleValues {
-        ADMIN(1), EMPLOYEE(2), MERCHANT(3);
-        private final int id;
+        ADMIN(1, "Admin"),
+        MERCHANT(2, "Merchant"),
+        EMPLOYEE(3, "Employee");
 
-        public static RoleValues fetchById(int id) {
-            return Arrays.stream(RoleValues.values()).filter(template -> template.getId() == id)
+        private final int id;
+        private final String name;
+
+        // Method to get ID by name
+        public static Integer fetchIdByName(String roleName) {
+            for (RoleValues role : RoleValues.values()) {
+                if (role.name.equalsIgnoreCase(roleName)) {
+                    return role.id;
+                }
+            }
+            return null;  // Return null if not found
+        }
+        public static String fetchById(int id) {
+            return Objects.requireNonNull(Arrays.stream(RoleValues.values()).filter(template -> template.getId() == id)
                     .findFirst()
-                    .orElse(null);
+                    .orElse(null)).name;
         }
     }
 }

@@ -20,7 +20,7 @@ CREATE TABLE tbls_role (
                            modified_at timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                            PRIMARY KEY (id)
 );
-insert into tbls_role(name, display_name, `order`) values('admin', 'Admin', 1), ('employee', 'Employee', 2), ('merchant', 'Merchant', 3);
+insert into tbls_role(name, display_name, `order`) values('admin', 'Admin', 1), ('merchant', 'Merchant', 2), ('employee', 'Employee', 3);
 
 CREATE TABLE tbls_shift (
                             id int NOT NULL AUTO_INCREMENT,

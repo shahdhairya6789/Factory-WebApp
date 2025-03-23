@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 import static com.example.demo.constants.ApplicationConstants.ValidationMessage.EMAIL_RESTRICTION_MSG;
 import static com.example.demo.constants.ApplicationConstants.ValidationMessage.NAME_REQUIRED_MSG;
 import static com.example.demo.constants.ApplicationConstants.ValidationMessage.PASSWORD_RESTRICTION_MSG;
@@ -21,14 +23,18 @@ import static com.example.demo.constants.ApplicationConstants.ValidationMessage.
 public class SignUpRequestObject {
     @NotNull(message = NAME_REQUIRED_MSG)
     private String name;
+    @NotNull(message = EMAIL_RESTRICTION_MSG)
+    private int managerId;
+    private Map<String, Integer> salaries;
     @NotNull
     @Size(min = 10, max = 10, message = PHONE_RESTRICTION_MSG)
     private String mobileNumber;
-//    @NotNull
-//    @Email(message = EMAIL_RESTRICTION_MSG)
+    @Email(message = EMAIL_RESTRICTION_MSG)
     private String email;
-//    @NotNull
-//    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
-//            message = PASSWORD_RESTRICTION_MSG)
+
+    @Pattern(
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
+            message = PASSWORD_RESTRICTION_MSG
+    )
     private String password;
 }

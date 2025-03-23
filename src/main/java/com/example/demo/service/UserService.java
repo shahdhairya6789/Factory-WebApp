@@ -24,4 +24,8 @@ public interface UserService {
     CommonResponse<String> resendOtp(int userId);
 
     CommonResponse<List<String>> getRoles();
+
+    CommonResponse<List<User>> getUsers();
+
+    CommonResponse<String> deleteUser(int userId);
 }

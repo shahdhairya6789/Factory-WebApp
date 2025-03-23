@@ -1,5 +1,6 @@
 package com.example.demo.repository.master;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,4 +15,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmailOrMobileNumber(String email, String mobileNumber);
 
     Optional<User> findByMobileNumber(String mobileNumber);
+    
+    List<User> findByManager_Id(int managerId);
 }

@@ -1,11 +1,16 @@
 package com.example.demo.service.serviceImpl;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import com.example.demo.models.entity.constant.Role;
+import com.example.demo.models.entity.constant.SalaryType;
+import com.example.demo.models.entity.mapping.Salary;
 import com.example.demo.repository.constant.RoleRepository;
+
 import jakarta.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +26,7 @@ import com.example.demo.models.dto.SignUpRequestObject;
 import com.example.demo.models.dto.SigninRequest;
 import com.example.demo.models.dto.VerifyOtpRequestObject;
 import com.example.demo.models.entity.master.User;
+import com.example.demo.repository.mapping.SalaryRepository;
 import com.example.demo.repository.master.UserRepository;
 import com.example.demo.service.UserService;
 import com.example.demo.util.CommonUtils;
@@ -28,9 +34,9 @@ import com.example.demo.util.CommonUtils;
 import static com.example.demo.constants.ApplicationConstants.ErrorMessage.INVALID_CREDENTIALS;
 import static com.example.demo.constants.ApplicationConstants.ErrorMessage.UNMATCHED_OTP;
 import static com.example.demo.constants.ApplicationConstants.ErrorMessage.USER_NOT_FOUND;
-import static com.example.demo.constants.ApplicationConstants.SuccessMessage.*;
 
 @Service
+//@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
 public class UserServiceImpl implements UserService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
@@ -40,6 +46,7 @@ public class UserServiceImpl implements UserService {
     private final JwtService jwtService;
     private final SendSMS sendSMS;
     private final RoleRepository roleRepository;
+    private final SalaryRepository salaryRepository;
 
     @Value("${jwt.expiration}")
     private String jwtExpirationStr;
@@ -54,12 +61,13 @@ public class UserServiceImpl implements UserService {
     public UserServiceImpl(UserRepository userRepository,
                            BCryptPasswordEncoder bCryptPasswordEncoder,
                            JwtService jwtService,
-                           SendSMS sendSMS, RoleRepository roleRepository) {
+                           SendSMS sendSMS, RoleRepository roleRepository, SalaryRepository salaryRepository) {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.jwtService = jwtService;
         this.sendSMS = sendSMS;
         this.roleRepository = roleRepository;
+        this.salaryRepository = salaryRepository;
     }
 
     private String encryptPassword(String password) {
@@ -88,9 +96,22 @@ public class UserServiceImpl implements UserService {
             user = optionalUser.get();
             message = ApplicationConstants.SuccessMessage.USER_ALREADY_EXISTS;
         } else {
+            User manager = userRepository.findById(signUpRequestObject.getManagerId()).orElse(null);
+            if (Objects.isNull(manager)) {
+                throw new IllegalArgumentException("Invalid manager id");
+            }
             int otp = CommonUtils.generateOTP();
             Set<Role> role = new HashSet<>();
             roleRepository.findById(Role.RoleValues.MERCHANT.getId()).ifPresent(role::add);
+            List<Salary> salaryList = new ArrayList<>();
+            signUpRequestObject.getSalaries().forEach((type, salaryAmount) -> {
+                SalaryType.SalaryTypeValues salaryType = SalaryType.SalaryTypeValues.fetchByName(type);
+                if (Objects.isNull(salaryType)) {
+                    throw new IllegalArgumentException("Invalid Salary Type");
+                }
+                Salary salary = new Salary(salaryAmount, new Timestamp(System.currentTimeMillis()), new SalaryType(salaryType.getId()));
+                salaryList.add(salary);
+            });
 
             // save user details
             user = User.builder()
@@ -98,6 +119,7 @@ public class UserServiceImpl implements UserService {
                     .password(bCryptPasswordEncoder.encode(signUpRequestObject.getPassword()))
                     .mobileNumber(signUpRequestObject.getMobileNumber())
                     .name(signUpRequestObject.getName())
+                    .manager(manager)
                     .otp(String.valueOf(otp))
                     .isActive(2)
                     .roles(role)
@@ -106,13 +128,17 @@ public class UserServiceImpl implements UserService {
             // call external service to send OTP to mobile number
             sendSMS.sendSms(signUpRequestObject.getMobileNumber(), otp);
             user = userRepository.save(user);
+            for (Salary salary : salaryList) {
+                salary.setUser(user);
+            }
+            salaryRepository.saveAll(salaryList);
             message = ApplicationConstants.SuccessMessage.USER_REGISTERED;
         }
 
         user.setOtp(null);
         user.setCreatedAt(null);
         user.setModifiedAt(null);
-        LOGGER.debug("Out UserServiceImpl::register for email {}", signUpRequestObject.getEmail());
+        LOGGER.debug("Out UserServiceImpl::register for userIdentification {}", signUpRequestObject.    getMobileNumber());
         return new CommonResponse<>(user, message);
     }
 
@@ -133,7 +159,7 @@ public class UserServiceImpl implements UserService {
         if (CommonUtils.checkValueAbsent(user.getOtp(), String.valueOf(verifyOtpRequestObject.getOtp()))) {
             throw new IllegalArgumentException(UNMATCHED_OTP);
         }
-        String authenticationToken = jwtService.generateToken(user.getMobileNumber(),roles.stream().map(Role::getName).collect(Collectors.toList()));
+        String authenticationToken = jwtService.generateToken(user.getMobileNumber(), roles.stream().map(Role::getName).collect(Collectors.toList()));
         user.setLoginToken(authenticationToken);
         user = userRepository.save(user);
         HashMap<String, Object> responseMap = new HashMap<>();
@@ -171,12 +197,12 @@ public class UserServiceImpl implements UserService {
         }
 
         // prepare response
-        responseMap.put("token", jwtService.generateToken(user.getMobileNumber(),roles.stream().map(Role::getName).collect(Collectors.toList())));
+        responseMap.put("token", jwtService.generateToken(user.getMobileNumber(), roles.stream().map(Role::getName).collect(Collectors.toList())));
         responseMap.put("expires_in", System.currentTimeMillis() + jwtExpiration);
         responseMap.put("expires_at", new Date(System.currentTimeMillis() + jwtExpiration));
         responseMap.put("user", user);
         LOGGER.debug("Out UserServiceImpl::loginByEmailOrPhone");
-        return new CommonResponse<>(responseMap, USER_LOGIN);
+        return new CommonResponse<>(responseMap, ApplicationConstants.SuccessMessage.USER_LOGIN);
     }
 
     public CommonResponse<String> resendOtp(int userId) {
@@ -191,7 +217,7 @@ public class UserServiceImpl implements UserService {
         sendSMS.sendSms(user.getMobileNumber(), otp);
         userRepository.save(user);
         LOGGER.debug("Out UserServiceImpl::resendOtp for user-identification {}", userId);
-        return new CommonResponse<>(OTP_SENT_AGAIN);
+        return new CommonResponse<>(ApplicationConstants.SuccessMessage.OTP_SENT_AGAIN);
     }
 
     @Override
@@ -200,7 +226,7 @@ public class UserServiceImpl implements UserService {
         LOGGER.debug("In UserServiceImpl::getRoles ");
         List<String> roles = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
         LOGGER.debug("Out UserServiceImpl::getRoles");
-        return new CommonResponse<>(roles, ROLES_FETCHED_SUCCESSFULLY);
+        return new CommonResponse<>(roles, ApplicationConstants.SuccessMessage.ROLES_FETCHED_SUCCESSFULLY);
     }
 
     public CommonResponse<User> resetPassword(int userId, String password) {
@@ -213,6 +239,28 @@ public class UserServiceImpl implements UserService {
         user.setPassword(encryptPassword(password));
         user = userRepository.save(user);
         LOGGER.debug("Out UserServiceImpl::resetPassword");
-        return new CommonResponse<>(user, PASSWORD_SET_SUCCESSFULLY);
+        return new CommonResponse<>(user, ApplicationConstants.SuccessMessage.PASSWORD_SET_SUCCESSFULLY);
+    }
+
+    @Override
+    public CommonResponse<List<User>> getUsers() {
+        LOGGER.debug("In UserServiceImpl::getUsers");
+        List<User> users = userRepository.findAll();
+        LOGGER.debug("Out UserServiceImpl::getUsers");
+        return new CommonResponse<>(users, ApplicationConstants.SuccessMessage.USER_LIST_FETCHED_SUCCESSFULLY);
+    }
+
+    @Override
+    public CommonResponse<String> deleteUser(int userId) {
+        LOGGER.debug("In UserServiceImpl::deleteUser for user-identification {}", userId);
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            throw new IllegalArgumentException(USER_NOT_FOUND);
+        }
+        User user = userOptional.get();
+        user.setIsActive(0);
+        userRepository.save(user);
+        LOGGER.debug("Out UserServiceImpl::deleteUser");
+        return new CommonResponse<>(ApplicationConstants.SuccessMessage.MACHINE_DELETED_SUCCESSFULLY);
     }
 }

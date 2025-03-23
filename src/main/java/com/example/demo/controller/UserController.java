@@ -78,7 +78,7 @@ public class UserController {
         return commonResponse;
     }
 
-    @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN')")
     @PatchMapping("/{userId}")
     public CommonResponse<String> deleteUser(@PathVariable int userId) {
         LOGGER.debug("In UserController::deleteUser for userId {}", userId);
@@ -88,7 +88,7 @@ public class UserController {
     }
 
     // TODO: Create new endpoint for fetching details under the manager
-    @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN')")
     @GetMapping
     public CommonResponse<List<User>> getUsers() {
         LOGGER.debug("In UserController::getUsers");

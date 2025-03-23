@@ -10,9 +10,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
+import com.example.demo.models.dto.AttendanceVO;
 import com.example.demo.models.entity.base.AuditColumns;
 import com.example.demo.models.entity.constant.SalaryType;
 import com.example.demo.models.entity.constant.Shift;
@@ -20,16 +22,18 @@ import com.example.demo.models.entity.constant.Shift;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity(name = "tblm_attendance")
+@NoArgsConstructor
 public class Attendance extends AuditColumns {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private Timestamp attendanceDate;
     private String production;
     private String dhaga;
     private int attendanceUserImageSize;
     private String attendanceUserImageName;
-    private boolean active;
+    private String attendanceUserImagePath;
+    private boolean isActive;
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
@@ -43,5 +47,24 @@ public class Attendance extends AuditColumns {
     @JoinColumn(name = "shift_id", referencedColumnName = "id")
     private Shift shift;
 
-
+    public Attendance(AttendanceVO attendanceVO,
+                      User user,
+                      Machine machine,
+                      Shift shift,
+                      SalaryType salaryType,
+                      String fileName,
+                      long fileSize,
+                      String filePath) {
+        this.attendanceDate = new Timestamp(attendanceVO.getAttendanceDate());
+        this.production = attendanceVO.getProduction();
+        this.dhaga = attendanceVO.getDhaga();
+        this.user = user;
+        this.machine = machine;
+        this.shift = shift;
+        this.salaryType = salaryType;
+        this.isActive = true;
+        this.attendanceUserImageName = fileName;
+        this.attendanceUserImageSize = (int) fileSize;
+        this.attendanceUserImagePath = filePath;
+    }
 }

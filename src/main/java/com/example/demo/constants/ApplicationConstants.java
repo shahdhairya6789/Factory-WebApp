@@ -31,6 +31,9 @@ public class ApplicationConstants {
         public static final String MACHINE_AREA_LENGTH_MESSAGE = "Machine area must be between 1 and 255 characters";
         public static final String MACHINE_HEAD_LENGTH_MESSAGE = "Machine head must be between 1 and 255 characters";
         public static final String INVALID_MACHINE_ID_MESSAGE = "Machine ID not found! It is either deleted or does not exist!";
+        public static final String INVALID_USER_ID_MESSAGE = "Machine ID not found! It is either deleted or does not exist!";
+        public static final String INVALID_SHIFT_ID_MESSAGE = "Machine ID not found! It is either deleted or does not exist!";
+        public static final String INVALID_SALARY_TYPE_ID_MESSAGE = "Machine ID not found! It is either deleted or does not exist!";
 
         // Verify User Related Validation Message
         public static final String INVALID_USER_ID = "UserId cannot be null or empty!";

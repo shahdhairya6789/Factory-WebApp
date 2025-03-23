@@ -122,7 +122,7 @@ public class UserServiceImpl implements UserService {
                     .name(signUpRequestObject.getName())
                     .manager(manager)
                     .otp(String.valueOf(otp))
-                    .isActive(2)
+                    .isActive(true)
                     .roles(role)
                     .build();
 
@@ -259,7 +259,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException(USER_NOT_FOUND);
         }
         User user = userOptional.get();
-        user.setIsActive(0);
+        user.setActive(false);
         userRepository.save(user);
         LOGGER.debug("Out UserServiceImpl::deleteUser");
         return new CommonResponse<>(ApplicationConstants.SuccessMessage.USER_DELETED_SUCCESSFULLY);
@@ -268,7 +268,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public CommonResponse<ValidUsername> validUsername(String username) {
         LOGGER.debug("In UserServiceImpl::validUsername for user-identification {}", username);
-        boolean validUser = userRepository.existsByMobileNumberAndIsActive(username);
+        boolean validUser = userRepository.existsByMobileNumberAndIsActive(username, true);
         LOGGER.debug("Out UserServiceImpl::validUsername");
         return new CommonResponse<>(new ValidUsername(validUser), null);
     }

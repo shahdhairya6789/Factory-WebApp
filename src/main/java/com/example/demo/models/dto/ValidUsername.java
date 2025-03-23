@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ValidUsername {
-    private boolean validUsername;
+    private boolean userNameExists;
 }

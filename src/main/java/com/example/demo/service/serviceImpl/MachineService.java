@@ -36,7 +36,7 @@ public class MachineService {
 
     public CommonResponse<Machine> getMachineById(int id) {
         LOGGER.info("In MachineService.getMachineById");
-        Machine machine = machineRepository.findById(id);
+        Machine machine = machineRepository.findById(id).orElse(null);
         LOGGER.info("Out MachineService.getMachineById");
         return new CommonResponse<>(machine, ApplicationConstants.SuccessMessage.MACHINE_DETAILS_SUCCESSFULLY);
     }
@@ -55,7 +55,7 @@ public class MachineService {
 
     public CommonResponse<Machine> updateMachineDetails(int id, CreateMachineVO createMachineVO) {
         LOGGER.info("In MachineService.updateMachineDetails");
-        Machine machine = machineRepository.findById(id);
+        Machine machine = machineRepository.findById(id).orElse(null);
         if (Objects.isNull(machine) || !machine.isActive()) {
             throw new IllegalArgumentException(ApplicationConstants.ValidationMessage.INVALID_MACHINE_ID_MESSAGE);
         }
@@ -70,7 +70,7 @@ public class MachineService {
 
     public CommonResponse<String> deleteMachineDetails(int id) {
         LOGGER.info("In MachineService.deleteMachineDetails");
-        Machine machine = machineRepository.findById(id);
+        Machine machine = machineRepository.findById(id).orElse(null);
         if (Objects.isNull(machine) || !machine.isActive()) {
             throw new IllegalArgumentException(ApplicationConstants.ValidationMessage.INVALID_MACHINE_ID_MESSAGE);
         }

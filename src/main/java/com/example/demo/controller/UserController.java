@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.models.CommonResponse;
 import com.example.demo.models.dto.ResetPassword;
 import com.example.demo.models.dto.SignUpRequestObject;
+import com.example.demo.models.dto.ValidUsername;
 import com.example.demo.models.entity.master.User;
 import com.example.demo.service.UserService;
 
@@ -66,6 +68,7 @@ public class UserController {
         return commonResponse;
     }
 
+    // TODO: Create new endpoint for updating the manager
     @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN')")
     @PatchMapping
     public CommonResponse<User> updateUserDetails(@RequestBody SignUpRequestObject user) {
@@ -76,14 +79,15 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN')")
-    @PatchMapping
-    public CommonResponse<User> deleteUser(@RequestBody SignUpRequestObject user) {
-        LOGGER.debug("In UserController::deleteUser for email {}", user.getEmail());
-        CommonResponse<User> commonResponse = userService.register(user);
+    @PatchMapping("/{userId}")
+    public CommonResponse<String> deleteUser(@PathVariable int userId) {
+        LOGGER.debug("In UserController::deleteUser for userId {}", userId);
+        CommonResponse<String> commonResponse = userService.deleteUser(userId);
         LOGGER.debug("Out UserController::deleteUser");
         return commonResponse;
     }
 
+    // TODO: Create new endpoint for fetching details under the manager
     @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN')")
     @GetMapping
     public CommonResponse<List<User>> getUsers() {
@@ -92,4 +96,15 @@ public class UserController {
         LOGGER.debug("Out UserController::getUsers");
         return commonResponse;
     }
+
+    @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN')")
+    @GetMapping("/valid-username")
+    public CommonResponse<ValidUsername> validateUserName(@RequestParam String username) {
+        LOGGER.debug("In UserController::validateUserName for username {}", username);
+        CommonResponse<ValidUsername> commonResponse = userService.validUsername(username);
+        LOGGER.debug("Out UserController::validateUserName");
+        return commonResponse;
+    }
+
+
 }

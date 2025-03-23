@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.example.demo.models.dto.ValidUsername;
 import com.example.demo.models.entity.constant.Role;
 import com.example.demo.models.entity.constant.SalaryType;
 import com.example.demo.models.entity.mapping.Salary;
@@ -138,7 +139,7 @@ public class UserServiceImpl implements UserService {
         user.setOtp(null);
         user.setCreatedAt(null);
         user.setModifiedAt(null);
-        LOGGER.debug("Out UserServiceImpl::register for userIdentification {}", signUpRequestObject.    getMobileNumber());
+        LOGGER.debug("Out UserServiceImpl::register for userIdentification {}", signUpRequestObject.getMobileNumber());
         return new CommonResponse<>(user, message);
     }
 
@@ -261,6 +262,14 @@ public class UserServiceImpl implements UserService {
         user.setIsActive(0);
         userRepository.save(user);
         LOGGER.debug("Out UserServiceImpl::deleteUser");
-        return new CommonResponse<>(ApplicationConstants.SuccessMessage.MACHINE_DELETED_SUCCESSFULLY);
+        return new CommonResponse<>(ApplicationConstants.SuccessMessage.USER_DELETED_SUCCESSFULLY);
+    }
+
+    @Override
+    public CommonResponse<ValidUsername> validUsername(String username) {
+        LOGGER.debug("In UserServiceImpl::validUsername for user-identification {}", username);
+        boolean validUser = userRepository.existsByMobileNumberAndIsActive(username);
+        LOGGER.debug("Out UserServiceImpl::validUsername");
+        return new CommonResponse<>(new ValidUsername(validUser), null);
     }
 }

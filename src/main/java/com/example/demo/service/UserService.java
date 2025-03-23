@@ -7,6 +7,7 @@ import java.util.Map;
 import com.example.demo.models.CommonResponse;
 import com.example.demo.models.dto.SigninRequest;
 import com.example.demo.models.dto.SignUpRequestObject;
+import com.example.demo.models.dto.ValidUsername;
 import com.example.demo.models.dto.VerifyOtpRequestObject;
 import com.example.demo.models.entity.master.User;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,4 +29,6 @@ public interface UserService {
     CommonResponse<List<User>> getUsers();
 
     CommonResponse<String> deleteUser(int userId);
+
+    CommonResponse<ValidUsername> validUsername(String username);
 }

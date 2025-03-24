@@ -1,5 +1,6 @@
 package com.example.demo.models.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -16,4 +17,6 @@ public class CreateMachineVO {
     private String heads;
     @Size(min = 1, max = 255, message = MACHINE_AREA_LENGTH_MESSAGE)
     private String area;
+    @JsonProperty("isActive")
+    private boolean isActive;
 }

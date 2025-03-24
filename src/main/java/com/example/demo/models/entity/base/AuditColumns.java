@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.sql.Timestamp;
 
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Data

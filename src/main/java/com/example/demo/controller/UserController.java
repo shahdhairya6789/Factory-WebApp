@@ -89,11 +89,11 @@ public class UserController {
 
     // TODO: Create new endpoint for fetching details under the manager
 //    @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN')")
-    @GetMapping
-    public CommonResponse<List<User>> getUsers() {
-        LOGGER.debug("In UserController::getUsers");
-        CommonResponse<List<User>> commonResponse = userService.getUsers();
-        LOGGER.debug("Out UserController::getUsers");
+    @GetMapping("/employees/{managerId}")
+    public CommonResponse<List<User>> getUsersByManagerId(@PathVariable int managerId) {
+        LOGGER.debug("In UserController::getUsers: {}", managerId);
+        CommonResponse<List<User>> commonResponse = userService.getUserByManagerId(managerId);
+        LOGGER.debug("Out UserController::getUsers: {}", managerId);
         return commonResponse;
     }
 

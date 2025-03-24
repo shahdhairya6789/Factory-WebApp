@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.example.demo.models.dto.ValidUsername;
+import com.example.demo.models.dto.*;
 import com.example.demo.models.entity.constant.Role;
 import com.example.demo.models.entity.constant.SalaryType;
 import com.example.demo.models.entity.mapping.Salary;
@@ -23,9 +23,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.constants.ApplicationConstants;
 import com.example.demo.models.CommonResponse;
-import com.example.demo.models.dto.SignUpRequestObject;
-import com.example.demo.models.dto.SigninRequest;
-import com.example.demo.models.dto.VerifyOtpRequestObject;
 import com.example.demo.models.entity.master.User;
 import com.example.demo.repository.mapping.SalaryRepository;
 import com.example.demo.repository.master.UserRepository;
@@ -124,6 +121,8 @@ public class UserServiceImpl implements UserService {
                     .otp(String.valueOf(otp))
                     .isActive(true)
                     .roles(role)
+                    .createdBy(manager.getId())
+                    .modifiedBy(manager.getId())
                     .build();
 
             // call external service to send OTP to mobile number
@@ -140,6 +139,48 @@ public class UserServiceImpl implements UserService {
         user.setCreatedAt(null);
         user.setModifiedAt(null);
         LOGGER.debug("Out UserServiceImpl::register for userIdentification {}", signUpRequestObject.getMobileNumber());
+        return new CommonResponse<>(user, message);
+    }
+
+    public CommonResponse<User> register(SignUpSelfRequest signUpSelfRequest) {
+        LOGGER.debug("In UserServiceImpl::register self for email {}", signUpSelfRequest.getEmail());
+
+        String message;
+        Optional<User> optionalUser = userRepository.findByMobileNumber(signUpSelfRequest.getMobileNumber());
+        User user;
+
+        // validate if the user already exists
+        if (optionalUser.isPresent()) {
+            user = optionalUser.get();
+            message = ApplicationConstants.SuccessMessage.USER_ALREADY_EXISTS;
+        } else {
+            int otp = CommonUtils.generateOTP();
+            Set<Role> role = new HashSet<>();
+            roleRepository.findById(Role.RoleValues.MERCHANT.getId()).ifPresent(role::add);
+            List<Salary> salaryList = new ArrayList<>();
+
+
+            // save user details
+            user = User.builder()
+                    .email(signUpSelfRequest.getEmail())
+                    .password(bCryptPasswordEncoder.encode(signUpSelfRequest.getPassword()))
+                    .mobileNumber(signUpSelfRequest.getMobileNumber())
+                    .name(signUpSelfRequest.getName())
+                    .manager(null)
+                    .otp(String.valueOf(otp))
+                    .isActive(true)
+                    .roles(role)
+                    .createdBy(-1)
+                    .modifiedBy(-1)
+                    .build();
+
+            // call external service to send OTP to mobile number
+            sendSMS.sendSms(signUpSelfRequest.getMobileNumber(), otp);
+            user = userRepository.save(user);
+            message = ApplicationConstants.SuccessMessage.USER_REGISTERED;
+        }
+
+        LOGGER.debug("Out UserServiceImpl::register self for userIdentification {}", signUpSelfRequest.getMobileNumber());
         return new CommonResponse<>(user, message);
     }
 
@@ -271,5 +312,13 @@ public class UserServiceImpl implements UserService {
         boolean validUser = userRepository.existsByMobileNumberAndIsActive(username, true);
         LOGGER.debug("Out UserServiceImpl::validUsername");
         return new CommonResponse<>(new ValidUsername(validUser), null);
+    }
+
+    @Override
+    public CommonResponse<List<User>> getUserByManagerId(int managerId) {
+        LOGGER.debug("In UserServiceImpl::getUserByManagerId for user-identification {}", managerId);
+        List<User> users = userRepository.findByManagerId(managerId);
+        LOGGER.debug("Out UserServiceImpl::getUserByManagerId: {}", managerId);
+        return new CommonResponse<>(users, ApplicationConstants.SuccessMessage.USER_LIST_FETCHED_SUCCESSFULLY);
     }
 }

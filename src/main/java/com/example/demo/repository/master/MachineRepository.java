@@ -12,4 +12,5 @@ import com.example.demo.models.entity.master.Machine;
 public interface MachineRepository extends JpaRepository<Machine, Long> {
     Optional<Machine> findById(int machineId);
     List<Machine> findByIsActiveTrue();
+    List<Machine> findByUserId(Integer userId);
 }

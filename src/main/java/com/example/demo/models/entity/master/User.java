@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import com.example.demo.models.entity.base.AuditColumns;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -36,6 +37,7 @@ public class User extends AuditColumns {
     private String email;
     private String mobileNumber;
     private String loginToken;
+    @JsonIgnore
     private String otp;
     @JsonIgnore
     @ManyToOne
@@ -53,12 +55,10 @@ public class User extends AuditColumns {
     @BatchSize(size = 20)
     private Set<Role> roles = new HashSet<>();
 
+    @Column(name = "created_by")
     @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "created_by_user_id", referencedColumnName = "id")
-    private User createdByUser;
+    private Integer createdBy;
+    @Column(name = "modified_by")
     @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "modified_by_user_id", referencedColumnName = "id")
-    private User modifiedByUser;
+    private Integer modifiedBy;
 }

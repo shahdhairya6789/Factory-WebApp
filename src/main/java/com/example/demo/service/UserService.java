@@ -5,16 +5,15 @@ import java.util.List;
 import java.util.Map;
 
 import com.example.demo.models.CommonResponse;
-import com.example.demo.models.dto.SigninRequest;
-import com.example.demo.models.dto.SignUpRequestObject;
-import com.example.demo.models.dto.ValidUsername;
-import com.example.demo.models.dto.VerifyOtpRequestObject;
+import com.example.demo.models.dto.*;
 import com.example.demo.models.entity.master.User;
 import org.springframework.security.core.GrantedAuthority;
 
 public interface UserService {
 
     CommonResponse<User> register(SignUpRequestObject user);
+
+    CommonResponse<User> register(SignUpSelfRequest user);
 
     CommonResponse<Map<String, Object>> loginByEmailOrPhone(SigninRequest user);
 
@@ -31,4 +30,6 @@ public interface UserService {
     CommonResponse<String> deleteUser(int userId);
 
     CommonResponse<ValidUsername> validUsername(String username);
+
+    CommonResponse<List<User>> getUserByManagerId(int managerId);
 }

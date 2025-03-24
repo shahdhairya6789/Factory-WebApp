@@ -1,9 +1,7 @@
 package com.example.demo.models.entity.master;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,6 +42,15 @@ public class Machine extends AuditColumns implements Serializable {
 
     @JsonProperty("isActive")
     private boolean isActive;
+
+    @JsonProperty("userId")
+    private Integer userId;
+
+    @Column(name = "created_by")
+    private Integer createdBy;
+
+    @Column(name = "modified_by")
+    private Integer modifiedBy;
 
     public Machine() {}
 

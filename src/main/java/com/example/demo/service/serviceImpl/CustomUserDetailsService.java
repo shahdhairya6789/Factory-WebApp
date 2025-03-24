@@ -1,5 +1,6 @@
 package com.example.demo.service.serviceImpl;
 
+import com.example.demo.models.entity.master.CustomUserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,7 +20,6 @@ import com.example.demo.models.entity.mapping.UserRole;
 import com.example.demo.models.entity.master.User;
 import com.example.demo.repository.mapping.UserRoleRepository;
 import com.example.demo.repository.master.UserRepository;
-import com.example.demo.util.CustomUserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
@@ -47,6 +47,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toList());
 
-        return new org.springframework.security.core.userdetails.User(user.get().getMobileNumber(), user.get().getPassword(), authorities);
+        return new CustomUserDetails(user.get());
     }
 }

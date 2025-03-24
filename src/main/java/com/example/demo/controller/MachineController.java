@@ -44,6 +44,15 @@ public class MachineController {
         return machineListResponse;
     }
 
+    @PreAuthorize("hasAnyAuthority('MERCHANT','ADMIN')")
+    @GetMapping("/user/{userId}")
+    public CommonResponse<List<Machine>> getMachineByUserId(@PathVariable Integer userId) {
+        LOGGER.info("In MachineController.getMachine");
+        CommonResponse<List<Machine>> machines = machineService.getMachineByUserId(userId);
+        LOGGER.info("Out MachineController.getMachine");
+        return machines;
+    }
+
     @PreAuthorize("hasAnyAuthority('MERCHANT','ADMIN','EMPLOYEE')")
     @GetMapping("/{id}")
     public CommonResponse<Machine> getMachine(@PathVariable Integer id) {

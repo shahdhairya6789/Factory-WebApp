@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.models.dto.*;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.security.Principal;
@@ -12,15 +13,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.models.CommonResponse;
-import com.example.demo.models.dto.ResetPassword;
-import com.example.demo.models.dto.SigninRequest;
-import com.example.demo.models.dto.SignUpRequestObject;
-import com.example.demo.models.dto.VerifyOtpRequestObject;
 import com.example.demo.models.entity.master.User;
 import com.example.demo.service.UserService;
 
 @RestController
-//@RequestMapping("")
+@RequestMapping("/auth")
 //@CrossOrigin(origins = "http://localhost:5173")  // Frontend URL
 public class AuthController {
 
@@ -32,7 +29,7 @@ public class AuthController {
     }
 
 //    @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN', 'EMPLOYEE', '')")
-    @PostMapping("/auth/login")
+    @PostMapping("/login")
     public CommonResponse<Map<String, Object>> login(HttpServletRequest httpServletRequest,
                                                      Principal principal,
                                                      @RequestBody SigninRequest user) {
@@ -42,11 +39,19 @@ public class AuthController {
         return commonResponse;
     }
 
-    @PostMapping("/auth/verify-otp")
+    @PostMapping("/verify-otp")
     public CommonResponse<Map<String, Object>> verifyOtp(@RequestBody VerifyOtpRequestObject verifyOtpRequestObject) {
         LOGGER.debug("In AuthController::verifyOtp for userID {}", verifyOtpRequestObject.getUserId());
         CommonResponse<Map<String, Object>> commonResponse = userService.verify(verifyOtpRequestObject);
         LOGGER.debug("Out AuthController::verifyOtp");
+        return commonResponse;
+    }
+
+    @PostMapping("/register")
+    public CommonResponse<User> register(@RequestBody SignUpSelfRequest signUpSelfRequest) {
+        LOGGER.debug("In AuthController::register for email {}", signUpSelfRequest.getEmail());
+        CommonResponse<User> commonResponse = userService.register(signUpSelfRequest);
+        LOGGER.debug("Out AuthController::register");
         return commonResponse;
     }
 

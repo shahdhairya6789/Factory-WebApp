@@ -43,7 +43,7 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));  // Allowed origins
+        configuration.setAllowedOrigins(List.of("http://localhost:9098"));  // Allowed origins
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);  // Enable authentication CORS
@@ -58,7 +58,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // Enable CORS
-                .csrf(csrf -> csrf.disable())  // Disable CSRF for stateless APIs
+                .csrf(AbstractHttpConfigurer::disable)  // Disable CSRF for stateless APIs
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()  // Public routes
                         .requestMatchers("/v1/**").authenticated()  // Authenticated routes

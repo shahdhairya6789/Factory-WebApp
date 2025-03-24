@@ -14,10 +14,12 @@ public class ApplicationConstants {
         public static final String PASSWORD_SET_SUCCESSFULLY = "Password set successfully!";
         public static final String USER_ALREADY_EXISTS = "User already exists!";
         public static final String MACHINE_LIST_FETCHED_SUCCESSFULLY = "Machine list fetched successfully!";
+        public static final String USER_LIST_FETCHED_SUCCESSFULLY = "User list fetched successfully!";
         public static final String ROLE_LIST_FETCHED_SUCCESSFULLY = "Role list fetched successfully!";
         public static final String MACHINE_DETAILS_SUCCESSFULLY = "Machine details successfully!";
         public static final String MACHINE_SAVED_SUCCESSFULLY = "Machine details saved successfully!";
         public static final String MACHINE_UPDATED_SUCCESSFULLY = "Machine details updated successfully!";
+        public static final String USER_DELETED_SUCCESSFULLY = "User details deleted successfully!";
         public static final String MACHINE_DELETED_SUCCESSFULLY = "Machine details deleted successfully!";
         public static final String ROLES_FETCHED_SUCCESSFULLY = "Roles fetch successfully!";
     }
@@ -29,6 +31,9 @@ public class ApplicationConstants {
         public static final String MACHINE_AREA_LENGTH_MESSAGE = "Machine area must be between 1 and 255 characters";
         public static final String MACHINE_HEAD_LENGTH_MESSAGE = "Machine head must be between 1 and 255 characters";
         public static final String INVALID_MACHINE_ID_MESSAGE = "Machine ID not found! It is either deleted or does not exist!";
+        public static final String INVALID_USER_ID_MESSAGE = "Machine ID not found! It is either deleted or does not exist!";
+        public static final String INVALID_SHIFT_ID_MESSAGE = "Machine ID not found! It is either deleted or does not exist!";
+        public static final String INVALID_SALARY_TYPE_ID_MESSAGE = "Machine ID not found! It is either deleted or does not exist!";
 
         // Verify User Related Validation Message
         public static final String INVALID_USER_ID = "UserId cannot be null or empty!";

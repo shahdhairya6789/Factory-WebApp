@@ -2,7 +2,9 @@ package com.example.demo.service.serviceImpl;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -14,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.constants.ApplicationConstants;
 import com.example.demo.models.CommonResponse;
+import com.example.demo.models.dto.AttendanceDetailsDTO;
 import com.example.demo.models.dto.AttendanceVO;
 import com.example.demo.models.entity.constant.SalaryType;
 import com.example.demo.models.entity.constant.Shift;
@@ -52,7 +55,7 @@ public class AttendanceService {
         this.attendanceMaxFileSize = Long.parseLong(Objects.requireNonNull(environment.getProperty("attendance.max.file.size")));
     }
 
-    public CommonResponse<String> addAttendance(MultipartFile file, AttendanceVO attendanceVO) throws Exception {
+    public CommonResponse<Attendance> addAttendance(MultipartFile file, AttendanceVO attendanceVO) throws Exception {
         LOGGER.info("In AttendanceService addAttendance");
         // Validate request
         User user = userRepository.findById(attendanceVO.getUserId()).orElseThrow(() -> new IllegalArgumentException(ApplicationConstants.ValidationMessage.INVALID_USER_ID_MESSAGE));
@@ -74,9 +77,9 @@ public class AttendanceService {
 
         // Add attendance
         Attendance attendance = new Attendance(attendanceVO, user, machine, shift, salaryType, attendanceDate, file.getSize(), filePath);
-        attendanceRepository.save(attendance);
+        attendance = attendanceRepository.save(attendance);
         LOGGER.info("Out AttendanceService addAttendance");
-        return new CommonResponse<>("Success");
+        return new CommonResponse<>(attendance, "Success");
     }
 
     public void saveImage(MultipartFile file, String storagePath) throws IOException {
@@ -88,5 +91,14 @@ public class AttendanceService {
         // Save the image
         File destination = new File(storagePath + File.separator + file.getOriginalFilename());
         file.transferTo(destination);
+    }
+
+    public CommonResponse<List<AttendanceDetailsDTO>> findAttendanceForUser(int userId, Long startDate, Long endDate) {
+        LOGGER.info("In AttendanceService findAttendanceForUser");
+        Timestamp startDateFilter = new Timestamp(startDate * 1000L);
+        Timestamp endDateFilter = new Timestamp(endDate * 1000L);
+        List<AttendanceDetailsDTO> attendanceList = attendanceRepository.fetchAttendanceDetails(userId, startDateFilter, endDateFilter);
+        LOGGER.info("Out AttendanceService findAttendanceForUser");
+        return new CommonResponse<>(attendanceList, "Attendance List fetched successfully");
     }
 }

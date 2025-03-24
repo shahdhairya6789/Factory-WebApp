@@ -4,10 +4,4 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <include file="/liquibase/changelog/DatabaseSetup.sql"/>
-    <include file="/liquibase/changelog/AddPasswordColumnForUser.sql"/>
-    <include file="/liquibase/changelog/AddTokenColumnForUserTable.sql"/>
-    <include file="/liquibase/changelog/AddOTPColumnForUser.sql"/>
-    <include file="/liquibase/changelog/Remove Null Conditions from Users.sql"/>
-    <include file="/liquibase/changelog/Add filePath to Attendance.sql"/>
-    <include file="/liquibase/changelog/MODIFY active column.sql"/>
 </databaseChangeLog>

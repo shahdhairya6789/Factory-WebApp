@@ -55,7 +55,7 @@ public class Attendance extends AuditColumns {
                       String fileName,
                       long fileSize,
                       String filePath) {
-        this.attendanceDate = new Timestamp(attendanceVO.getAttendanceDate());
+        this.attendanceDate = new Timestamp(attendanceVO.getAttendanceDate()* 1000L);
         this.production = attendanceVO.getProduction();
         this.dhaga = attendanceVO.getDhaga();
         this.user = user;

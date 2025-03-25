@@ -55,10 +55,10 @@ public class User extends AuditColumns {
     @BatchSize(size = 20)
     private Set<Role> roles = new HashSet<>();
 
-    @Column(name = "created_by")
+    @Column(name = "created_by_user_id")
     @JsonIgnore
     private Integer createdBy;
-    @Column(name = "modified_by")
+    @Column(name = "modified_by_user_id")
     @JsonIgnore
     private Integer modifiedBy;
 }

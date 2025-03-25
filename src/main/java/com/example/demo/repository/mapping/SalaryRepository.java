@@ -5,6 +5,9 @@ import org.springframework.stereotype.Repository;
 
 import com.example.demo.models.entity.mapping.Salary;
 
+import java.util.List;
+
 @Repository
 public interface SalaryRepository extends JpaRepository<Salary, Integer> {
+    List<Salary> findByUserId(int userId);
 }

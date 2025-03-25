@@ -22,9 +22,9 @@ create table if not exists tbls_role
     PRIMARY KEY (id)
 );
 insert into tbls_role(name, display_name, `order`)
-values ('admin', 'Admin', 1),
-       ('merchant', 'Merchant', 2),
-       ('employee', 'Employee', 3);
+values ('ADMIN', 'Admin', 1),
+       ('MERCHANT', 'Merchant', 2),
+       ('EMPLOYEE', 'Employee', 3);
 
 create table if not exists tbls_shift
 (
@@ -157,8 +157,7 @@ create table if not exists tblt_user_advance_salary_mapping
     modified_at         timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     CONSTRAINT fk_user_user_advance_salary_mapping FOREIGN KEY (user_id) REFERENCES tblm_user (id),
-    CONSTRAINT fk_paid_by_user_user_advance_salary_mapping FOREIGN KEY (paid_by_user_id) REFERENCES tblm_user (id),
-    CONSTRAINT fk_salary_user_advance_salary_mapping FOREIGN KEY (salary_type_id) REFERENCES tbls_salary_type (id)
+    CONSTRAINT fk_paid_by_user_user_advance_salary_mapping FOREIGN KEY (paid_by_user_id) REFERENCES tblm_user (id)
 );
 
 create table if not exists tblt_user_payment_mapping

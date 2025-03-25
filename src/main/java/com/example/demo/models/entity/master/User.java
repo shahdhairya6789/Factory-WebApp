@@ -1,12 +1,9 @@
 package com.example.demo.models.entity.master;
 
 import com.example.demo.models.entity.constant.Role;
+import com.example.demo.models.entity.mapping.Salary;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import com.example.demo.models.entity.base.AuditColumns;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -55,10 +52,10 @@ public class User extends AuditColumns {
     @BatchSize(size = 20)
     private Set<Role> roles = new HashSet<>();
 
-    @Column(name = "created_by_user_id")
+    @Column(name = "created_by")
     @JsonIgnore
     private Integer createdBy;
-    @Column(name = "modified_by_user_id")
+    @Column(name = "modified_by")
     @JsonIgnore
     private Integer modifiedBy;
 }

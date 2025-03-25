@@ -8,6 +8,7 @@ import com.example.demo.models.dto.*;
 import com.example.demo.models.entity.constant.Role;
 import com.example.demo.models.entity.constant.SalaryType;
 import com.example.demo.models.entity.mapping.Salary;
+import com.example.demo.models.entity.master.CustomUserDetails;
 import com.example.demo.repository.constant.RoleRepository;
 
 import jakarta.annotation.PostConstruct;
@@ -28,6 +29,7 @@ import com.example.demo.repository.mapping.SalaryRepository;
 import com.example.demo.repository.master.UserRepository;
 import com.example.demo.service.UserService;
 import com.example.demo.util.CommonUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.example.demo.constants.ApplicationConstants.ErrorMessage.INVALID_CREDENTIALS;
 import static com.example.demo.constants.ApplicationConstants.ErrorMessage.UNMATCHED_OTP;
@@ -82,6 +84,7 @@ public class UserServiceImpl implements UserService {
      * @param signUpRequestObject {@link SignUpRequestObject}
      * @return commonResponse containing user details
      */
+    @Transactional
     public CommonResponse<User> register(SignUpRequestObject signUpRequestObject) {
         LOGGER.debug("In UserServiceImpl::register for email {}", signUpRequestObject.getEmail());
 
@@ -100,14 +103,14 @@ public class UserServiceImpl implements UserService {
             }
             int otp = CommonUtils.generateOTP();
             Set<Role> role = new HashSet<>();
-            roleRepository.findById(Role.RoleValues.MERCHANT.getId()).ifPresent(role::add);
+            roleRepository.findById(Role.RoleValues.EMPLOYEE.getId()).ifPresent(role::add);
             List<Salary> salaryList = new ArrayList<>();
             signUpRequestObject.getSalaries().forEach((type, salaryAmount) -> {
                 SalaryType.SalaryTypeValues salaryType = SalaryType.SalaryTypeValues.fetchByName(type);
                 if (Objects.isNull(salaryType)) {
                     throw new IllegalArgumentException("Invalid Salary Type");
                 }
-                Salary salary = new Salary(salaryAmount, new Timestamp(System.currentTimeMillis()), new SalaryType(salaryType.getId()));
+                Salary salary = new Salary(salaryAmount, new Timestamp(System.currentTimeMillis()), new SalaryType(salaryType.getId()), manager.getId(), manager.getId());
                 salaryList.add(salary);
             });
 
@@ -127,6 +130,7 @@ public class UserServiceImpl implements UserService {
 
             // call external service to send OTP to mobile number
             sendSMS.sendSms(signUpRequestObject.getMobileNumber(), otp);
+
             user = userRepository.save(user);
             for (Salary salary : salaryList) {
                 salary.setUser(user);
@@ -134,14 +138,11 @@ public class UserServiceImpl implements UserService {
             salaryRepository.saveAll(salaryList);
             message = ApplicationConstants.SuccessMessage.USER_REGISTERED;
         }
-
-        user.setOtp(null);
-        user.setCreatedAt(null);
-        user.setModifiedAt(null);
         LOGGER.debug("Out UserServiceImpl::register for userIdentification {}", signUpRequestObject.getMobileNumber());
         return new CommonResponse<>(user, message);
     }
 
+    @Transactional
     public CommonResponse<User> register(SignUpSelfRequest signUpSelfRequest) {
         LOGGER.debug("In UserServiceImpl::register self for email {}", signUpSelfRequest.getEmail());
 
@@ -184,6 +185,33 @@ public class UserServiceImpl implements UserService {
         return new CommonResponse<>(user, message);
     }
 
+    public CommonResponse<User> updateUserDetails(int userId, SignUpRequestObject user) {
+        LOGGER.debug("In UserServiceImpl::updateUserDetails for userId {}", userId);
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            throw new IllegalArgumentException(USER_NOT_FOUND);
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer currentUserId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
+        User existingUser = userOptional.get();
+        List<Salary> existingSalaries = salaryRepository.findByUserId(userId);
+        for (Salary salary : existingSalaries) {
+            // Set values for each salary object as needed
+            Map<String, Integer> userSalaries = user.getSalaries();
+            salary.setSalary(userSalaries.get(salary.getSalaryType().getName())); // Replace with actual field and value
+            salary.setModifiedBy(currentUserId);
+        }
+        salaryRepository.saveAll(existingSalaries);
+        existingUser.setModifiedBy(currentUserId);
+        existingUser = userRepository.save(existingUser);
+        existingUser.setName(user.getName());
+        existingUser.setMobileNumber(user.getMobileNumber());
+
+        // Update other fields as necessary
+        existingUser = userRepository.save(existingUser);
+        LOGGER.debug("Out UserServiceImpl::updateUserDetails");
+        return new CommonResponse<>(existingUser, ApplicationConstants.SuccessMessage.USER_UPDATED_SUCCESSFULLY);
+    }
     /**
      * This method verifies the OTP for the user sent from the request
      *
@@ -315,10 +343,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public CommonResponse<List<User>> getUserByManagerId(int managerId) {
         LOGGER.debug("In UserServiceImpl::getUserByManagerId for user-identification {}", managerId);
         List<User> users = userRepository.findByManagerId(managerId);
         LOGGER.debug("Out UserServiceImpl::getUserByManagerId: {}", managerId);
+        LOGGER.info("user: {}", users);
         return new CommonResponse<>(users, ApplicationConstants.SuccessMessage.USER_LIST_FETCHED_SUCCESSFULLY);
+    }
+
+    @Override
+    @Transactional
+    public CommonResponse<Map<String, Object>> getUserWithSalaries(int userId) {
+        LOGGER.debug("In UserServiceImpl::getUserWithSalaries for userId {}", userId);
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            throw new IllegalArgumentException(USER_NOT_FOUND);
+        }
+        User user = userOptional.get();
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("user", user);
+        responseMap.put("salaries", salaryRepository.findByUserId(userId)); // Assuming you have a SalaryRepository
+        LOGGER.debug("Out UserServiceImpl::getUserWithSalaries");
+        return new CommonResponse<>(responseMap, ApplicationConstants.SuccessMessage.EMPLOYEE_FETCHED_SUCCESSFULLY);
     }
 }

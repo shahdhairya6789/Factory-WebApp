@@ -1,11 +1,7 @@
 package com.example.demo.models.entity.mapping;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -15,6 +11,7 @@ import java.sql.Timestamp;
 import com.example.demo.models.entity.base.AuditColumns;
 import com.example.demo.models.entity.constant.SalaryType;
 import com.example.demo.models.entity.master.User;
+import lombok.ToString;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -26,16 +23,24 @@ public class Salary extends AuditColumns {
     private int id;
     private int salary;
     private Timestamp salaryDate;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JsonIgnore
+    @ToString.Exclude
     private User user;
     @ManyToOne
     @JoinColumn(name = "salary_type_id", referencedColumnName = "id")
     private SalaryType salaryType;
 
-    public Salary(int salary, Timestamp salaryDate, SalaryType salaryType) {
+    private int createdBy;
+    private int modifiedBy;
+
+    public Salary(int salary, Timestamp salaryDate, SalaryType salaryType, int createdBy, int modifiedBy) {
         this.salary = salary;
         this.salaryDate = salaryDate;
         this.salaryType = salaryType;
+        this.createdBy = createdBy;
+        this.modifiedBy = modifiedBy;
     }
 }

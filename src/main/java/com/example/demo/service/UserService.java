@@ -1,13 +1,11 @@
 package com.example.demo.service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import com.example.demo.models.CommonResponse;
 import com.example.demo.models.dto.*;
 import com.example.demo.models.entity.master.User;
-import org.springframework.security.core.GrantedAuthority;
 
 public interface UserService {
 
@@ -32,4 +30,7 @@ public interface UserService {
     CommonResponse<ValidUsername> validUsername(String username);
 
     CommonResponse<List<User>> getUserByManagerId(int managerId);
+    CommonResponse<Map<String, Object>> getUserWithSalaries(int userId);
+
+    CommonResponse<User> updateUserDetails(int userId, SignUpRequestObject user);
 }

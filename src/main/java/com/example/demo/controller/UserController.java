@@ -1,18 +1,12 @@
 package com.example.demo.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.models.CommonResponse;
 import com.example.demo.models.dto.ResetPassword;
@@ -60,7 +54,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN')")
-    @PostMapping
+    @PostMapping("/employee")
     public CommonResponse<User> register(@RequestBody SignUpRequestObject user) {
         LOGGER.debug("In UserController::register for email {}", user.getEmail());
         CommonResponse<User> commonResponse = userService.register(user);
@@ -68,12 +62,11 @@ public class UserController {
         return commonResponse;
     }
 
-    // TODO: Create new endpoint for updating the manager
     @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN')")
-    @PatchMapping
-    public CommonResponse<User> updateUserDetails(@RequestBody SignUpRequestObject user) {
-        LOGGER.debug("In UserController::updateUserDetails for email {}", user.getEmail());
-        CommonResponse<User> commonResponse = userService.register(user);
+    @PutMapping("/employee/{userId}")
+    public CommonResponse<User> updateUserDetails(@PathVariable int userId, @RequestBody SignUpRequestObject user) {
+        LOGGER.debug("In UserController::updateUserDetails for userId {}", userId);
+        CommonResponse<User> commonResponse = userService.updateUserDetails(userId, user);
         LOGGER.debug("Out UserController::updateUserDetails");
         return commonResponse;
     }
@@ -89,7 +82,7 @@ public class UserController {
 
     // TODO: Create new endpoint for fetching details under the manager
 //    @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN')")
-    @GetMapping("/employees/{managerId}")
+        @GetMapping("/employees/{managerId}")
     public CommonResponse<List<User>> getUsersByManagerId(@PathVariable int managerId) {
         LOGGER.debug("In UserController::getUsers: {}", managerId);
         CommonResponse<List<User>> commonResponse = userService.getUserByManagerId(managerId);
@@ -106,5 +99,12 @@ public class UserController {
         return commonResponse;
     }
 
-
+    @GetMapping("/employees/{userId}/salaries")
+    @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN')")
+    public CommonResponse<Map<String, Object>> getUserWithSalaries(@PathVariable int userId) {
+        LOGGER.debug("In UserController::getUserWithSalaries for userId {}", userId);
+        CommonResponse<Map<String, Object>> commonResponse = userService.getUserWithSalaries(userId);
+        LOGGER.debug("Out UserController::getUserWithSalaries");
+        return commonResponse;
+    }
 }

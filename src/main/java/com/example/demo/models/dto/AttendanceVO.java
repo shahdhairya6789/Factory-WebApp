@@ -8,9 +8,9 @@ import java.sql.Timestamp;
 public class AttendanceVO {
     private int userId;
     private int machineId;
-    private int salaryTypeId;
-    private String production;
-    private String dhaga;
+    private int production;
+    private int dhaga;
+    private int frames;
     private int shiftId;
     private int attendanceDate;
 }

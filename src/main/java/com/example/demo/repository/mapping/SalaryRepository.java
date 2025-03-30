@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface SalaryRepository extends JpaRepository<Salary, Integer> {
     List<Salary> findByUserId(int userId);
+    List<Salary> findByUser_Manager_Id(int managerId);
 }

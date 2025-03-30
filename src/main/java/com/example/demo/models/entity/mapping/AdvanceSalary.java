@@ -20,7 +20,7 @@ import com.example.demo.models.entity.master.User;
 @Entity(name = "tblt_user_advance_salary_mapping")
 public class AdvanceSalary extends AuditColumns {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private int advanceSalary;
     private Timestamp advanceSalaryDate;
@@ -30,7 +30,4 @@ public class AdvanceSalary extends AuditColumns {
     @ManyToOne
     @JoinColumn(name = "paid_by_user_id", referencedColumnName = "id")
     private User paidByUser;
-    @ManyToOne
-    @JoinColumn(name = "salary_type_id", referencedColumnName = "id")
-    private SalaryType salaryType;
 }

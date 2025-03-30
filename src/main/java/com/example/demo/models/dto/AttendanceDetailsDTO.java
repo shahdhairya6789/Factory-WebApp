@@ -10,8 +10,9 @@ import java.sql.Timestamp;
 public class AttendanceDetailsDTO {
     private int attendanceId;
     private Timestamp attendanceDate;
-    private String production;
-    private String dhaga;
+    private int production;
+    private int dhaga;
+    private int frames;
     private int userId;
     private String userName;
     private int shiftId;

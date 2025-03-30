@@ -94,8 +94,9 @@ create table if not exists tblm_attendance
 (
     id                         int NOT NULL AUTO_INCREMENT,
     attendance_date            timestamp default CURRENT_TIMESTAMP,
-    production                 varchar(255) NULL,
-    dhaga                      varchar(255) NULL,
+    production                 int,
+    dhaga                      int,
+    frames                     int,
     attendance_user_image_size int NULL,
     attendance_user_image_name varchar(255) NULL,
     attendance_user_image_path varchar(255) NULL,
@@ -166,13 +167,14 @@ create table if not exists tblt_user_payment_mapping
     user_id         int NOT NULL,
     payment_amount  int NOT NULL,
     advance_payment int NOT NULL,
-    salary_type_id  int NOT NULL,
+    working_days    int NOT NULL,
     payment_date    timestamp default CURRENT_TIMESTAMP,
     created_by      int NOT NULL,
     modified_by     int NOT NULL,
     created_at      timestamp default CURRENT_TIMESTAMP,
     modified_at     timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
+    CONSTRAINT fk_user_user_payment_mapping FOREIGN KEY (user_id) REFERENCES tblm_user (id),
     CONSTRAINT fk_user_user_payment_mapping FOREIGN KEY (user_id) REFERENCES tblm_user (id),
     CONSTRAINT fk_salary_user_payment_mapping FOREIGN KEY (salary_type_id) REFERENCES tbls_salary_type (id)
 );

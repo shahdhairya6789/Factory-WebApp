@@ -26,7 +26,7 @@ public class AdvanceSalaryController {
         this.advanceSalaryService = advanceSalaryService;
     }
 
-    @PreAuthorize("hasAnyAuthority('Merchant')")
+//    @PreAuthorize("hasAnyAuthority('Merchant')")
     @PostMapping
     public CommonResponse<AdvanceSalaryDTO> addAdvanceSalary(@RequestBody AdvanceSalaryDTO advanceSalaryDTO) {
         LOGGER.info("In AdvanceSalaryController addAdvanceSalary");
@@ -35,7 +35,7 @@ public class AdvanceSalaryController {
         return commonResponse;
     }
 
-    @PreAuthorize("hasAnyAuthority('Merchant', 'Employee')")
+//    @PreAuthorize("hasAnyAuthority('Merchant', 'Employee')")
     @GetMapping
     public CommonResponse<List<AdvanceSalaryDTO>> getAdvanceSalary(@RequestParam Integer userId,
                                                                    @RequestParam Long startDate,

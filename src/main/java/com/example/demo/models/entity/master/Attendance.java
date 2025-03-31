@@ -28,8 +28,9 @@ public class Attendance extends AuditColumns {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private Timestamp attendanceDate;
-    private String production;
-    private String dhaga;
+    private int production;
+    private int dhaga;
+    private int frames;
     private int attendanceUserImageSize;
     private String attendanceUserImageName;
     private String attendanceUserImagePath;

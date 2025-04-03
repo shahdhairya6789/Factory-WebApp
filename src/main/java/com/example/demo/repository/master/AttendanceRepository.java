@@ -2,6 +2,7 @@ package com.example.demo.repository.master;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.models.dto.AttendanceDetailsDTO;
+import com.example.demo.models.dto.UserSalaryAttendanceDTO;
 import com.example.demo.models.entity.master.Attendance;
 
 @Repository
@@ -42,4 +44,28 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Integer>
             @Param("userId") int userId,
             @Param("startDate") Timestamp startDate,
             @Param("endDate") Timestamp endDate);
+
+    @Query(value = "select " +
+            "    tusm.user_id as userId, " +
+            "    tusm.salary_type_id as salaryTypeId, " +
+            "    sum(tusm.salary)/ 365 as perDaySalary, " +
+            "    count(distinct DATE_FORMAT(attendance_date , \"%d-%m-%Y\")) as workingDays, " +
+            "    sum(tusm.salary) * count(distinct DATE_FORMAT(attendance_date , \"%d-%m-%Y\")) / 365 as payment " +
+            "from " +
+            "    tblt_user_salary_mapping tusm " +
+            "left join tblm_attendance ta on " +
+            "    tusm.user_id = ta.user_id " +
+            "    and tusm.salary_type_id = ta.salary_type_id " +
+            "where " +
+            "    tusm.user_id in (:userIds) " +
+            "    and ta.attendance_date between :startDate and :endDate " +
+            "group by  " +
+            "    tusm.user_id, " +
+            "    tusm.salary_type_id; ",
+            nativeQuery = true)
+    List<UserSalaryAttendanceDTO> findUserSalaryAttendanceByUserId(
+            @Param("userIds") Set<Integer> userIds,
+            @Param("startDate") Timestamp startDate,
+            @Param("endDate") Timestamp endDate
+    );
 }

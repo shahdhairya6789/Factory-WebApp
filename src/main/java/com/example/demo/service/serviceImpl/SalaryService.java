@@ -1,5 +1,7 @@
 package com.example.demo.service.serviceImpl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -89,16 +91,18 @@ public class SalaryService {
 
         Map<Integer, SalaryType> salaryTypeIdToSalaryTypeObject = salaryTypeRepository.findAll().stream().collect(Collectors.toMap(SalaryType::getId, Function.identity()));
         List<UserSalaryAttendanceDTO> userSalaryAttendanceDTOList = attendanceRepository.findUserSalaryAttendanceByUserId(userIdToUser.keySet(), startDate, endDate);
-        Map<Integer, Double> userIdToAdvancePaymentMap = advanceSalaryRepository.fetchAdvanceSalaryForUsersBetweenStartAndEndDate(userIdToUser.keySet(), startDate, endDate).stream().collect(Collectors.toMap(UserAdvanceSalaryDTO::getUserId, UserAdvanceSalaryDTO::getAdvanceSalaryAmount));
+        Map<Long, BigDecimal> userIdToAdvancePaymentMap = advanceSalaryRepository.fetchAdvanceSalaryForUsersBetweenStartAndEndDate(userIdToUser.keySet(), startDate, endDate).stream().collect(Collectors.toMap(UserAdvanceSalaryDTO::getUserId, UserAdvanceSalaryDTO::getAdvanceSalaryAmount));
         List<Payment> paymentList = new ArrayList<>();
         for (UserSalaryAttendanceDTO userSalaryAttendanceDTO : userSalaryAttendanceDTOList) {
+            int paymentAmount = (int) (userSalaryAttendanceDTO.getMonthlySalary() * userSalaryAttendanceDTO.getWorkingDays() / 365);
             Payment payment = new Payment();
-            payment.setSalaryType(salaryTypeIdToSalaryTypeObject.get(userSalaryAttendanceDTO.getSalaryTypeId()));
+            payment.setSalaryType(salaryTypeIdToSalaryTypeObject.get((int) userSalaryAttendanceDTO.getSalaryTypeId()));
             payment.setPaymentDate(currentDate);
-            payment.setUser(userIdToUser.get(userSalaryAttendanceDTO.getUserId()));
-            payment.setPaymentAmount((int) userSalaryAttendanceDTO.getPayment());
+            payment.setWorkingDays((int) userSalaryAttendanceDTO.getWorkingDays());
+            payment.setUser(userIdToUser.get((int) userSalaryAttendanceDTO.getUserId()));
+            payment.setPaymentAmount(paymentAmount);
             if (userSalaryAttendanceDTO.getSalaryTypeId() == SalaryType.SalaryTypeValues.ONE_MACHINE.getId()) {
-                int advanceSalary = userIdToAdvancePaymentMap.getOrDefault(userSalaryAttendanceDTO.getUserId(), 0.0).intValue();
+                int advanceSalary = userIdToAdvancePaymentMap.getOrDefault(userSalaryAttendanceDTO.getUserId(), BigDecimal.ZERO).intValue();
                 payment.setAdvancePayment(advanceSalary);
             }
             paymentList.add(payment);

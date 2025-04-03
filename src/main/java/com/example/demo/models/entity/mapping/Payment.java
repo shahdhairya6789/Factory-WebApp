@@ -25,6 +25,7 @@ public class Payment extends AuditColumns {
     private int advancePayment;
     private int paymentAmount;
     private Timestamp paymentDate;
+    private int workingDays;
     @ManyToOne
     @JoinColumn(name = "salary_type_id")
     private SalaryType salaryType;

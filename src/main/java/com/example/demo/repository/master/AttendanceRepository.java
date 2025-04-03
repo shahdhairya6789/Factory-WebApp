@@ -48,9 +48,8 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Integer>
     @Query(value = "select " +
             "    tusm.user_id as userId, " +
             "    tusm.salary_type_id as salaryTypeId, " +
-            "    sum(tusm.salary)/ 365 as perDaySalary, " +
-            "    count(distinct DATE_FORMAT(attendance_date , \"%d-%m-%Y\")) as workingDays, " +
-            "    sum(tusm.salary) * count(distinct DATE_FORMAT(attendance_date , \"%d-%m-%Y\")) / 365 as payment " +
+            "    tusm.salary as monthlySalary, " +
+            "    count(distinct DATE_FORMAT(attendance_date , \"%d-%m-%Y\")) as workingDays " +
             "from " +
             "    tblt_user_salary_mapping tusm " +
             "left join tblm_attendance ta on " +
@@ -61,7 +60,8 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Integer>
             "    and ta.attendance_date between :startDate and :endDate " +
             "group by  " +
             "    tusm.user_id, " +
-            "    tusm.salary_type_id; ",
+            "    tusm.salary_type_id," +
+            "    tusm.salary ",
             nativeQuery = true)
     List<UserSalaryAttendanceDTO> findUserSalaryAttendanceByUserId(
             @Param("userIds") Set<Integer> userIds,

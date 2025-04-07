@@ -1,10 +1,17 @@
 package com.example.demo.controller;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,24 +38,35 @@ public class AttendanceController {
         this.attendanceService = attendanceService;
     }
 
-//    @PreAuthorize("hasAnyAuthority('Merchant', 'Employee')")
+    //    @PreAuthorize("hasAnyAuthority('MERCHANT', 'EMPLOYEE')")
     @PostMapping(consumes = "multipart/form-data")
     public CommonResponse<Attendance> addAttendance(@RequestPart("attendance") AttendanceVO attendance,
-                                        @RequestPart("file") MultipartFile file) throws Exception {
+                                                    @RequestPart("file") MultipartFile file) throws Exception {
         LOGGER.info("In AttendanceController addAttendance");
         CommonResponse<Attendance> commonResponse = attendanceService.addAttendance(file, attendance);
         LOGGER.info("In AttendanceController addAttendance");
         return commonResponse;
     }
 
-//    @PreAuthorize("hasAnyAuthority('Merchant', 'Employee')")
+    //    @PreAuthorize("hasAnyAuthority('MERCHANT', 'EMPLOYEE')")
     @GetMapping
     public CommonResponse<List<AttendanceDetailsDTO>> getAttendance(@RequestParam Long startDate,
-                                                          @RequestParam Long endDate,
-                                                          @RequestParam Integer userId){
+                                                                    @RequestParam Long endDate,
+                                                                    @RequestParam Integer userId) {
         LOGGER.info("In AttendanceController getAttendance");
         CommonResponse<List<AttendanceDetailsDTO>> commonResponse = attendanceService.findAttendanceForUser(userId, startDate, endDate);
         LOGGER.info("In AttendanceController getAttendance");
         return commonResponse;
+    }
+
+    @GetMapping(
+            value = "/attendance-image",
+            produces = "application/octet-stream"
+    )
+    public ResponseEntity<byte[]> getAttendancePicById(@RequestParam Integer attendanceId) {
+        LOGGER.info("In AttendanceController getAttendancePicById");
+        ResponseEntity<byte[]> responseEntity = attendanceService.getAttendanceFileData(attendanceId);
+        LOGGER.info("In AttendanceController getAttendancePicById");
+        return responseEntity;
     }
 }

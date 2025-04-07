@@ -2,6 +2,7 @@ package com.example.demo.service.serviceImpl;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -9,14 +10,20 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -77,9 +84,8 @@ public class AttendanceService {
         if (Objects.isNull(file) || file.isEmpty() || file.getSize() >= attendanceMaxFileSize) {
             throw new IllegalArgumentException("File is null or empty");
         }
-        String attendanceDate = new SimpleDateFormat("yyyy/MM/dd").format((long) attendanceVO.getAttendanceDate() * 1000);
-        String managerName = Objects.isNull(user.getManager()) ? "" : user.getManager().getName();
-        String filePath = String.format(attendanceFilePath, attendanceDate, managerName, user.getName());
+        String filePath = getAttendanceFilePath(attendanceVO.getAttendanceDate(), user);
+        String attendanceDate = new SimpleDateFormat("yyyy/MM/dd").format(attendanceVO.getAttendanceDate() * 1000);
         try {
             saveImage(file, filePath);
         } catch (IOException e) {
@@ -112,5 +118,36 @@ public class AttendanceService {
         List<AttendanceDetailsDTO> attendanceList = attendanceRepository.fetchAttendanceDetails(userId, startDateFilter, endDateFilter);
         LOGGER.info("Out AttendanceService findAttendanceForUser");
         return new CommonResponse<>(attendanceList, "Attendance List fetched successfully");
+    }
+
+    public ResponseEntity<byte[]> getAttendanceFileData(int attendanceId) {
+        LOGGER.info("In AttendanceService getAttendanceFileData");
+        Attendance attendance = attendanceRepository.findById(attendanceId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid attendance id " + attendanceId));
+        String filePath = getAttendanceFilePath(attendance.getAttendanceDate().getTime(), attendance.getUser());
+        String fileName = attendance.getAttendanceUserImageName();
+        File file = new File(filePath + File.separator + fileName);
+        byte[] zippedData;
+        if (!file.exists()) {
+            throw new RuntimeException("File not found");
+        }
+        try {
+            zippedData = Files.readAllBytes(file.toPath());
+        } catch (IOException e) {
+            throw new RuntimeException("Exception while reading file");
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentDisposition(ContentDisposition.builder("attachment").filename(file.getName()).build());
+        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        httpHeaders.setContentLength(zippedData.length);
+        LOGGER.info("Out AttendanceService getAttendanceFileData");
+        return ResponseEntity.ok().headers(httpHeaders).body(zippedData);
+    }
+
+    private String getAttendanceFilePath(long attendanceEpoch,
+                                         User user) {
+        String attendanceDate = new SimpleDateFormat("yyyy/MM/dd").format(attendanceEpoch * 1000);
+        String managerName = Objects.isNull(user.getManager()) ? "Default" : user.getManager().getName();
+        return String.format(attendanceFilePath, managerName, user.getName(), attendanceDate);
     }
 }

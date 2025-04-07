@@ -20,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByManagerId(int managerId);
 
     boolean existsByMobileNumberAndIsActive(String mobileNumber, boolean isActive);
+
+    List<User> findUsersByManager_Id(int managerId);
 }

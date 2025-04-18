@@ -1,13 +1,10 @@
 package com.example.demo.service.serviceImpl;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.YearMonth;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.models.CommonResponse;
-import com.example.demo.models.dto.GenerateSalaryRequestDTO;
+import com.example.demo.models.dto.SalaryRequestDTO;
+import com.example.demo.models.dto.PaymentListingDTO;
 import com.example.demo.models.dto.UserAdvanceSalaryDTO;
 import com.example.demo.models.dto.UserSalaryAttendanceDTO;
 import com.example.demo.models.entity.constant.SalaryType;
@@ -55,7 +53,7 @@ public class SalaryService {
         this.paymentRepository = paymentRepository;
     }
 
-    public CommonResponse<String> generateSalary(GenerateSalaryRequestDTO generateSalaryRequestDTO) {
+    public CommonResponse<String> generateSalary(SalaryRequestDTO generateSalaryRequestDTO) {
         LOGGER.debug("In SalaryService generateSalary");
         String response = "No attendance present so no salary generated";
         if (Objects.isNull(generateSalaryRequestDTO.getMonth()) || Objects.isNull(generateSalaryRequestDTO.getYear())) {
@@ -65,11 +63,7 @@ public class SalaryService {
             throw new IllegalArgumentException("Provide valid userId and managerId");
         }
         Map<Integer, User> userIdToUser = new HashMap<>();
-        Timestamp startDate = Timestamp.valueOf(LocalDateTime.of(generateSalaryRequestDTO.getYear(), generateSalaryRequestDTO.getMonth(), 1, 0, 0));
-        YearMonth yearMonth = YearMonth.of(generateSalaryRequestDTO.getYear(), generateSalaryRequestDTO.getMonth());
-        LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(23, 59, 59);
-        Timestamp endDate = Timestamp.valueOf(endOfMonth);
-        Timestamp currentDate = Timestamp.from(Instant.now());
+        DateRecord result = getDateRecord(generateSalaryRequestDTO);
         if (Objects.nonNull(generateSalaryRequestDTO.getUserId())) {
             userIdToUser = userRepository.findById(generateSalaryRequestDTO.getUserId())
                     .stream()
@@ -90,14 +84,14 @@ public class SalaryService {
         }
 
         Map<Integer, SalaryType> salaryTypeIdToSalaryTypeObject = salaryTypeRepository.findAll().stream().collect(Collectors.toMap(SalaryType::getId, Function.identity()));
-        List<UserSalaryAttendanceDTO> userSalaryAttendanceDTOList = attendanceRepository.findUserSalaryAttendanceByUserId(userIdToUser.keySet(), startDate, endDate);
-        Map<Long, BigDecimal> userIdToAdvancePaymentMap = advanceSalaryRepository.fetchAdvanceSalaryForUsersBetweenStartAndEndDate(userIdToUser.keySet(), startDate, endDate).stream().collect(Collectors.toMap(UserAdvanceSalaryDTO::getUserId, UserAdvanceSalaryDTO::getAdvanceSalaryAmount));
+        List<UserSalaryAttendanceDTO> userSalaryAttendanceDTOList = attendanceRepository.findUserSalaryAttendanceByUserId(userIdToUser.keySet(), result.startDate(), result.endDate());
+        Map<Long, BigDecimal> userIdToAdvancePaymentMap = advanceSalaryRepository.fetchAdvanceSalaryForUsersBetweenStartAndEndDate(userIdToUser.keySet(), result.startDate(), result.endDate()).stream().collect(Collectors.toMap(UserAdvanceSalaryDTO::getUserId, UserAdvanceSalaryDTO::getAdvanceSalaryAmount));
         List<Payment> paymentList = new ArrayList<>();
         for (UserSalaryAttendanceDTO userSalaryAttendanceDTO : userSalaryAttendanceDTOList) {
             int paymentAmount = (int) (userSalaryAttendanceDTO.getMonthlySalary() * userSalaryAttendanceDTO.getWorkingDays() / 365);
             Payment payment = new Payment();
             payment.setSalaryType(salaryTypeIdToSalaryTypeObject.get((int) userSalaryAttendanceDTO.getSalaryTypeId()));
-            payment.setPaymentDate(currentDate);
+            payment.setPaymentDate(result.currentDate());
             payment.setWorkingDays((int) userSalaryAttendanceDTO.getWorkingDays());
             payment.setUser(userIdToUser.get((int) userSalaryAttendanceDTO.getUserId()));
             payment.setPaymentAmount(paymentAmount);
@@ -113,5 +107,28 @@ public class SalaryService {
         }
         LOGGER.debug("Out SalaryService generateSalary");
         return new CommonResponse<>(response);
+    }
+
+    private static DateRecord getDateRecord(SalaryRequestDTO generateSalaryRequestDTO) {
+        Timestamp startDate = Timestamp.valueOf(LocalDateTime.of(generateSalaryRequestDTO.getYear(), generateSalaryRequestDTO.getMonth(), 1, 0, 0));
+        YearMonth yearMonth = YearMonth.of(generateSalaryRequestDTO.getYear(), generateSalaryRequestDTO.getMonth());
+        LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(23, 59, 59);
+        Timestamp endDate = Timestamp.valueOf(endOfMonth);
+        Timestamp currentDate = Timestamp.from(Instant.now());
+        return new DateRecord(startDate, endDate, currentDate);
+    }
+
+    private record DateRecord(Timestamp startDate, Timestamp endDate, Timestamp currentDate) {
+    }
+
+    public CommonResponse<List<PaymentListingDTO>> getPaymentListingDTOListing(SalaryRequestDTO salaryRequestDTO) {
+        LOGGER.debug("In SalaryService getPaymentListingDTOListing");
+        if(Objects.isNull(salaryRequestDTO.getUserId())){
+            throw new IllegalArgumentException("UserId should not be null");
+        }
+        DateRecord result = getDateRecord(salaryRequestDTO);
+        List<PaymentListingDTO> paymentList = paymentRepository.getPaymentListingByUserId(salaryRequestDTO.getUserId(), result.startDate(), result.endDate());
+        LOGGER.debug("In SalaryService getPaymentListingDTOListing");
+        return new CommonResponse<>(paymentList, "Salary Listed Successfully");
     }
 }

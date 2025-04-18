@@ -56,33 +56,9 @@ public class SalaryService {
     public CommonResponse<String> generateSalary(SalaryRequestDTO generateSalaryRequestDTO) {
         LOGGER.debug("In SalaryService generateSalary");
         String response = "No attendance present so no salary generated";
-        if (Objects.isNull(generateSalaryRequestDTO.getMonth()) || Objects.isNull(generateSalaryRequestDTO.getYear())) {
-            throw new IllegalArgumentException("Start time and End Time need to be set");
-        }
-        if (Objects.isNull(generateSalaryRequestDTO.getUserId()) && Objects.isNull(generateSalaryRequestDTO.getManagerId())) {
-            throw new IllegalArgumentException("Provide valid userId and managerId");
-        }
-        Map<Integer, User> userIdToUser = new HashMap<>();
+        validateRequest(generateSalaryRequestDTO);
+        Map<Integer, User> userIdToUser = getIntegerUserMap(generateSalaryRequestDTO);
         DateRecord result = getDateRecord(generateSalaryRequestDTO);
-        if (Objects.nonNull(generateSalaryRequestDTO.getUserId())) {
-            userIdToUser = userRepository.findById(generateSalaryRequestDTO.getUserId())
-                    .stream()
-                    .collect(
-                            Collectors.toMap(
-                                    User::getId, Function.identity()
-                            )
-                    );
-        }
-        if (Objects.nonNull(generateSalaryRequestDTO.getManagerId())) {
-            userIdToUser = userRepository.findUsersByManager_Id(generateSalaryRequestDTO.getManagerId())
-                    .stream()
-                    .collect(
-                            Collectors.toMap(
-                                    User::getId, Function.identity()
-                            )
-                    );
-        }
-
         Map<Integer, SalaryType> salaryTypeIdToSalaryTypeObject = salaryTypeRepository.findAll().stream().collect(Collectors.toMap(SalaryType::getId, Function.identity()));
         List<UserSalaryAttendanceDTO> userSalaryAttendanceDTOList = attendanceRepository.findUserSalaryAttendanceByUserId(userIdToUser.keySet(), result.startDate(), result.endDate());
         Map<Long, BigDecimal> userIdToAdvancePaymentMap = advanceSalaryRepository.fetchAdvanceSalaryForUsersBetweenStartAndEndDate(userIdToUser.keySet(), result.startDate(), result.endDate()).stream().collect(Collectors.toMap(UserAdvanceSalaryDTO::getUserId, UserAdvanceSalaryDTO::getAdvanceSalaryAmount));
@@ -109,6 +85,38 @@ public class SalaryService {
         return new CommonResponse<>(response);
     }
 
+    private static void validateRequest(SalaryRequestDTO generateSalaryRequestDTO) {
+        if (Objects.isNull(generateSalaryRequestDTO.getMonth()) || Objects.isNull(generateSalaryRequestDTO.getYear())) {
+            throw new IllegalArgumentException("Start time and End Time need to be set");
+        }
+        if (Objects.isNull(generateSalaryRequestDTO.getUserId()) && Objects.isNull(generateSalaryRequestDTO.getManagerId())) {
+            throw new IllegalArgumentException("Provide valid userId and managerId");
+        }
+    }
+
+    private Map<Integer, User> getIntegerUserMap(SalaryRequestDTO generateSalaryRequestDTO) {
+        Map<Integer, User> userIdToUser = new HashMap<>();
+        if (Objects.nonNull(generateSalaryRequestDTO.getUserId())) {
+            userIdToUser = userRepository.findById(generateSalaryRequestDTO.getUserId())
+                    .stream()
+                    .collect(
+                            Collectors.toMap(
+                                    User::getId, Function.identity()
+                            )
+                    );
+        }
+        if (Objects.nonNull(generateSalaryRequestDTO.getManagerId())) {
+            userIdToUser = userRepository.findUsersByManager_Id(generateSalaryRequestDTO.getManagerId())
+                    .stream()
+                    .collect(
+                            Collectors.toMap(
+                                    User::getId, Function.identity()
+                            )
+                    );
+        }
+        return userIdToUser;
+    }
+
     private static DateRecord getDateRecord(SalaryRequestDTO generateSalaryRequestDTO) {
         Timestamp startDate = Timestamp.valueOf(LocalDateTime.of(generateSalaryRequestDTO.getYear(), generateSalaryRequestDTO.getMonth(), 1, 0, 0));
         YearMonth yearMonth = YearMonth.of(generateSalaryRequestDTO.getYear(), generateSalaryRequestDTO.getMonth());
@@ -123,12 +131,28 @@ public class SalaryService {
 
     public CommonResponse<List<PaymentListingDTO>> getPaymentListingDTOListing(SalaryRequestDTO salaryRequestDTO) {
         LOGGER.debug("In SalaryService getPaymentListingDTOListing");
-        if(Objects.isNull(salaryRequestDTO.getUserId())){
-            throw new IllegalArgumentException("UserId should not be null");
-        }
+        validateRequest(salaryRequestDTO);
         DateRecord result = getDateRecord(salaryRequestDTO);
-        List<PaymentListingDTO> paymentList = paymentRepository.getPaymentListingByUserId(salaryRequestDTO.getUserId(), result.startDate(), result.endDate());
+        List<PaymentListingDTO> paymentList = paymentRepository.getPaymentListingByUserId(
+                Objects.nonNull(salaryRequestDTO.getUserId()) ? salaryRequestDTO.getUserId() : 0,
+                Objects.nonNull(salaryRequestDTO.getManagerId()) ? salaryRequestDTO.getManagerId() : 0,
+                result.startDate(),
+                result.endDate()
+        );
         LOGGER.debug("In SalaryService getPaymentListingDTOListing");
         return new CommonResponse<>(paymentList, "Salary Listed Successfully");
+    }
+
+    public CommonResponse<String> regenerateSalary(SalaryRequestDTO salaryRequestDTO) {
+        LOGGER.debug("In SalaryService regenerateSalary");
+        validateRequest(salaryRequestDTO);
+        Map<Integer, User> userIdToUser = getIntegerUserMap(salaryRequestDTO);
+        DateRecord result = getDateRecord(salaryRequestDTO);
+        List<Payment> payments = paymentRepository.findByUserIdInAndPaymentDateBetween(userIdToUser.keySet(), result.startDate(), result.endDate());
+        CommonResponse<String> commonResponse = generateSalary(salaryRequestDTO);
+        payments.forEach(payment -> payment.setActive(false));
+        paymentRepository.saveAll(payments);
+        LOGGER.debug("Out SalaryService regenerateSalary");
+        return commonResponse;
     }
 }

@@ -1,7 +1,9 @@
 package com.example.demo.repository.mapping;
 
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,6 +18,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
     @Query(
             value = "select " +
                     "    tupm.user_id as userId, " +
+                    "    tu.name as userName, " +
                     "    sum(tupm.payment_amount) as totalPayableAmount , " +
                     "    sum(tupm.advance_payment) as totalAdvancePaid, " +
                     "    sum(tupm.payment_amount) - sum(tupm.advance_payment) as netPayable, " +
@@ -29,16 +32,23 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
                     "    tblt_user_salary_mapping tusm on " +
                     "    tupm.user_id = tusm.user_id " +
                     "    and tupm.salary_type_id = tusm.salary_type_id " +
+                    "left join " +
+                    "   tblm_user tu on " +
+                    "   tu.id = tupm.user_id" +
                     "where  " +
-                    "    tupm.user_id = :userId " +
+                    "    ( tupm.user_id = :userId or tu.manager_id = :managerId )" +
                     "    and tupm.payment_date between :startDate and :endDate " +
+                    "    and tupm.is_active = true " +
                     "group by " +
                     "    tupm.user_id ;",
             nativeQuery = true
     )
     List<PaymentListingDTO> getPaymentListingByUserId(
             @Param("userId") long userId,
+            @Param("managerId") long managerId,
             @Param("startDate")Timestamp startDate,
             @Param("endDate")Timestamp endDate
     );
+
+    List<Payment> findByUserIdInAndPaymentDateBetween(Set<Integer> userIds, Timestamp paymentDateAfter, Timestamp paymentDateBefore);
 }

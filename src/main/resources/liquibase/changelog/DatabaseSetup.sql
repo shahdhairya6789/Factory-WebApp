@@ -136,6 +136,7 @@ create table if not exists tblt_user_salary_mapping
     salary         int NOT NULL,
     salary_type_id int NOT NULL,
     salary_date    timestamp default CURRENT_TIMESTAMP,
+    is_active      boolean   default true,
     created_by     int NOT NULL,
     modified_by    int NOT NULL,
     created_at     timestamp default CURRENT_TIMESTAMP,
@@ -169,6 +170,7 @@ create table if not exists tblt_user_payment_mapping
     advance_payment int NOT NULL,
     working_days    int NOT NULL,
     payment_date    timestamp default CURRENT_TIMESTAMP,
+    is
     created_by      int NOT NULL,
     modified_by     int NOT NULL,
     created_at      timestamp default CURRENT_TIMESTAMP,

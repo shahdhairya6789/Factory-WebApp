@@ -27,17 +27,25 @@ public class SalaryController {
 
     @PostMapping
     public CommonResponse<String> generateSalary(@RequestBody SalaryRequestDTO generateSalaryRequestDTO) {
-        LOGGER.info("In AttendanceController getAttendance");
+        LOGGER.info("In SalaryController generateSalary");
         CommonResponse<String> commonResponse = salaryService.generateSalary(generateSalaryRequestDTO);
-        LOGGER.info("In AttendanceController getAttendance");
+        LOGGER.info("In SalaryController generateSalary");
         return commonResponse;
     }
 
     @PostMapping("/list")
     public CommonResponse<List<PaymentListingDTO>> getPaymentListingByUserId(@RequestBody SalaryRequestDTO salaryRequestDTO) {
-        LOGGER.info("In AttendanceController getPaymentListingByUserId");
+        LOGGER.info("In SalaryController getPaymentListingByUserId");
         CommonResponse<List<PaymentListingDTO>> commonResponse = salaryService.getPaymentListingDTOListing(salaryRequestDTO);
-        LOGGER.info("Out AttendanceController getPaymentListingByUserId");
+        LOGGER.info("Out SalaryController getPaymentListingByUserId");
+        return commonResponse;
+    }
+
+    @PostMapping("/regenerate")
+    public CommonResponse<String> regenerateSalary(@RequestBody SalaryRequestDTO generateSalaryRequestDTO) {
+        LOGGER.info("In SalaryController regenerateSalary");
+        CommonResponse<String> commonResponse = salaryService.regenerateSalary(generateSalaryRequestDTO);
+        LOGGER.info("In SalaryController regenerateSalary");
         return commonResponse;
     }
 }

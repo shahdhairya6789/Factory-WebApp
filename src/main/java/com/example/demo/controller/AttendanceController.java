@@ -38,7 +38,7 @@ public class AttendanceController {
         this.attendanceService = attendanceService;
     }
 
-    //    @PreAuthorize("hasAnyAuthority('MERCHANT', 'EMPLOYEE')")
+        @PreAuthorize("hasAnyAuthority('MERCHANT', 'EMPLOYEE')")
     @PostMapping(consumes = "multipart/form-data")
     public CommonResponse<Attendance> addAttendance(@RequestPart("attendance") AttendanceVO attendance,
                                                     @RequestPart("file") MultipartFile file) throws Exception {
@@ -48,7 +48,7 @@ public class AttendanceController {
         return commonResponse;
     }
 
-    //    @PreAuthorize("hasAnyAuthority('MERCHANT', 'EMPLOYEE')")
+    @PreAuthorize("hasAnyAuthority('MERCHANT', 'EMPLOYEE', 'ADMIN')")
     @GetMapping
     public CommonResponse<List<AttendanceDetailsDTO>> getAttendance(@RequestParam Long startDate,
                                                                     @RequestParam Long endDate,

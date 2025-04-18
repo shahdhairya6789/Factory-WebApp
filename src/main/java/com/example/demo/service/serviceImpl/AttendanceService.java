@@ -1,6 +1,7 @@
 package com.example.demo.service.serviceImpl;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.Timestamp;
@@ -16,6 +17,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
+import com.example.demo.models.entity.master.CustomUserDetails;
+import com.example.demo.util.DateUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +27,9 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -93,8 +99,10 @@ public class AttendanceService {
             throw new Exception("Exception while saving the attendance image");
         }
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer currentUserId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
         // Add attendance
-        Attendance attendance = new Attendance(attendanceVO, user, machine, shift, salaryType, attendanceDate, file.getSize(), filePath);
+        Attendance attendance = new Attendance(attendanceVO, user, machine, shift, salaryType, attendanceDate, file.getSize(), filePath, currentUserId, currentUserId);
         attendance = attendanceRepository.save(attendance);
         LOGGER.info("Out AttendanceService addAttendance");
         return new CommonResponse<>(attendance, "Success");
@@ -113,8 +121,8 @@ public class AttendanceService {
 
     public CommonResponse<List<AttendanceDetailsDTO>> findAttendanceForUser(int userId, Long startDate, Long endDate) {
         LOGGER.info("In AttendanceService findAttendanceForUser");
-        Timestamp startDateFilter = new Timestamp(startDate * 1000L);
-        Timestamp endDateFilter = new Timestamp(endDate * 1000L);
+        Timestamp startDateFilter = DateUtils.getStartOfDayTimestamp(startDate);
+        Timestamp endDateFilter = DateUtils.getEndOfDayTimestamp(endDate);
         List<AttendanceDetailsDTO> attendanceList = attendanceRepository.fetchAttendanceDetails(userId, startDateFilter, endDateFilter);
         LOGGER.info("Out AttendanceService findAttendanceForUser");
         return new CommonResponse<>(attendanceList, "Attendance List fetched successfully");

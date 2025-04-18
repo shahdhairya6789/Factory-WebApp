@@ -47,6 +47,8 @@ public class Attendance extends AuditColumns {
     @ManyToOne
     @JoinColumn(name = "shift_id", referencedColumnName = "id")
     private Shift shift;
+    private int createdBy;
+    private int modifiedBy;
 
     public Attendance(AttendanceVO attendanceVO,
                       User user,
@@ -55,7 +57,7 @@ public class Attendance extends AuditColumns {
                       SalaryType salaryType,
                       String fileName,
                       long fileSize,
-                      String filePath) {
+                      String filePath, int createdBy, int modifiedBy) {
         this.attendanceDate = new Timestamp(attendanceVO.getAttendanceDate()* 1000L);
         this.production = attendanceVO.getProduction();
         this.dhaga = attendanceVO.getDhaga();
@@ -67,5 +69,7 @@ public class Attendance extends AuditColumns {
         this.attendanceUserImageName = fileName;
         this.attendanceUserImageSize = (int) fileSize;
         this.attendanceUserImagePath = filePath;
+        this.createdBy=createdBy;
+        this.modifiedBy=modifiedBy;
     }
 }

@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 public class AttendanceDetailsDTO {
     private int attendanceId;
-    private Timestamp attendanceDate;
+    private long attendanceDate;
     private int production;
     private int dhaga;
     private int frames;

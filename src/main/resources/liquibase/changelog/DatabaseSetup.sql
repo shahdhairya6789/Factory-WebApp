@@ -174,9 +174,7 @@ create table if not exists tblt_user_payment_mapping
     created_at      timestamp default CURRENT_TIMESTAMP,
     modified_at     timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    CONSTRAINT fk_user_user_payment_mapping FOREIGN KEY (user_id) REFERENCES tblm_user (id),
-    CONSTRAINT fk_user_user_payment_mapping FOREIGN KEY (user_id) REFERENCES tblm_user (id),
-    CONSTRAINT fk_salary_user_payment_mapping FOREIGN KEY (salary_type_id) REFERENCES tbls_salary_type (id)
+    CONSTRAINT fk_user_user_payment_mapping FOREIGN KEY (user_id) REFERENCES tblm_user (id)
 );
 
 -- audit tables

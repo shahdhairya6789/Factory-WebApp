@@ -20,8 +20,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Integer>
     @Query(value =
             "SELECT " +
                     " a.id AS attendanceId, " +
-                    " a.attendance_date AS attendanceDate, " +
-                    " a.production as production, " +
+                    " UNIX_TIMESTAMP(a.attendance_date) AS attendanceDate, " +                    " a.production as production, " +
                     " a.dhaga as dhaga, " +
                     " a.frames as frames, " +
                     " u.id AS userId, " +

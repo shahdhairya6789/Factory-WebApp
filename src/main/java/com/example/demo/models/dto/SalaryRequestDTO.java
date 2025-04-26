@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GenerateSalaryRequestDTO {
+public class SalaryRequestDTO {
     private Integer month;
     private Integer year;
     private Integer userId;

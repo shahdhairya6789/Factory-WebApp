@@ -153,8 +153,6 @@ create table if not exists tblt_user_advance_salary_mapping
     advance_salary      int NOT NULL,
     advance_salary_date timestamp default CURRENT_TIMESTAMP,
     paid_by_user_id     int NOT NULL,
-    created_by          int NOT NULL,
-    modified_by         int NOT NULL,
     created_at          timestamp default CURRENT_TIMESTAMP,
     modified_at         timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
@@ -170,13 +168,15 @@ create table if not exists tblt_user_payment_mapping
     advance_payment int NOT NULL,
     working_days    int NOT NULL,
     payment_date    timestamp default CURRENT_TIMESTAMP,
-    is
+    is_active int not null,
+    salary_type_id int NOT NULL,
     created_by      int NOT NULL,
     modified_by     int NOT NULL,
     created_at      timestamp default CURRENT_TIMESTAMP,
     modified_at     timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    CONSTRAINT fk_user_user_payment_mapping FOREIGN KEY (user_id) REFERENCES tblm_user (id)
+    CONSTRAINT fk_user_user_payment_mapping FOREIGN KEY (user_id) REFERENCES tblm_user (id),
+    CONSTRAINT fk_salary_type_user_payment_mapping FOREIGN KEY (salary_type_id) REFERENCES tbls_salary_type (id)
 );
 
 -- audit tables

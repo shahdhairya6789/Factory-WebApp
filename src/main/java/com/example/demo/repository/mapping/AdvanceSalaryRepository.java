@@ -22,8 +22,8 @@ public interface AdvanceSalaryRepository extends JpaRepository<AdvanceSalary, In
             "    tuasm.advance_salary as advanceSalaryAmount, " +
             "    tuasm.paid_by_user_id as paidByUserId, " +
             "    UNIX_TIMESTAMP(tuasm.advance_salary_date) as advanceSalaryDate, " +
-            "    paid_tu.name as userName, " +
-            "    tu.name as paidByUserName " +
+            "    tu.name as userName, " +
+            "    paid_tu.name as paidByUserName " +
             " from " +
             "    tblt_user_advance_salary_mapping tuasm " +
             " join tblm_user tu ON " +

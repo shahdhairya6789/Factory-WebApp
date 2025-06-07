@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import java.util.List;
 
+import com.example.demo.models.dto.SalaryRequestDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,7 +27,7 @@ public class AdvanceSalaryController {
         this.advanceSalaryService = advanceSalaryService;
     }
 
-//    @PreAuthorize("hasAnyAuthority('Merchant')")
+    @PreAuthorize("hasAnyAuthority('MERCHANT')")
     @PostMapping
     public CommonResponse<AdvanceSalaryDTO> addAdvanceSalary(@RequestBody AdvanceSalaryDTO advanceSalaryDTO) {
         LOGGER.info("In AdvanceSalaryController addAdvanceSalary");
@@ -35,13 +36,11 @@ public class AdvanceSalaryController {
         return commonResponse;
     }
 
-//    @PreAuthorize("hasAnyAuthority('Merchant', 'Employee')")
-    @GetMapping
-    public CommonResponse<List<AdvanceSalaryDTO>> getAdvanceSalary(@RequestParam Integer userId,
-                                                                   @RequestParam Long startDate,
-                                                                   @RequestParam Long endDate) {
+    @PreAuthorize("hasAnyAuthority('MERCHANT', 'EMPLOYEE')")
+    @PostMapping("/list")
+    public CommonResponse<List<AdvanceSalaryDTO>> getAdvanceSalary(@RequestBody SalaryRequestDTO salaryRequestDTO) {
         LOGGER.info("In AdvanceSalaryController getAdvanceSalary");
-        CommonResponse<List<AdvanceSalaryDTO>> commonResponse = advanceSalaryService.getAdvanceSalaryByUserId(userId, startDate, endDate);
+        CommonResponse<List<AdvanceSalaryDTO>> commonResponse = advanceSalaryService.getAdvanceSalaryByUserId(salaryRequestDTO);
         LOGGER.info("Out AdvanceSalaryController getAdvanceSalary");
         return commonResponse;
     }

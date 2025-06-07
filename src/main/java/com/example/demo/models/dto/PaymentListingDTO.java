@@ -1,5 +1,7 @@
 package com.example.demo.models.dto;
 
+import java.sql.Timestamp;
+
 public interface PaymentListingDTO {
     Long getUserId();
     String getUserName();
@@ -10,4 +12,5 @@ public interface PaymentListingDTO {
     Integer getDoubleDayWorkingCount();
     Double getSingleMachineSalary();
     Double getDoubleMachineSalary();
+    Timestamp getPaymentDate();
 }

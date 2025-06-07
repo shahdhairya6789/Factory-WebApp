@@ -3,8 +3,13 @@ package com.example.demo.service.serviceImpl;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.example.demo.models.dto.SalaryRequestDTO;
+import com.example.demo.models.entity.master.CustomUserDetails;
+import com.example.demo.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.constants.ApplicationConstants;
@@ -41,11 +46,10 @@ public class AdvanceSalaryService {
         return new CommonResponse<>(advanceSalaryDTO, "AdvanceSalary saved successfully");
     }
 
-    public CommonResponse<List<AdvanceSalaryDTO>> getAdvanceSalaryByUserId(int userId, long startTime, long endTime) {
+    public CommonResponse<List<AdvanceSalaryDTO>> getAdvanceSalaryByUserId(SalaryRequestDTO salaryRequestDTO) {
         LOGGER.info("In AdvanceSalaryService getAdvanceSalaryByUserId");
-        Timestamp startDateFilter = new Timestamp(startTime * 1000L);
-        Timestamp endDateFilter = new Timestamp(endTime * 1000L);
-        List<AdvanceSalaryDTO> advanceSalaryDTOList = advanceSalaryRepository.fetchUserAdvanceSalary(userId, startDateFilter, endDateFilter);
+        DateUtils.DateRecord dateRecord = DateUtils.getDateRecord(salaryRequestDTO);
+        List<AdvanceSalaryDTO> advanceSalaryDTOList = advanceSalaryRepository.fetchUserAdvanceSalary(salaryRequestDTO.getUserId(), dateRecord.startDate(), dateRecord.endDate());
         LOGGER.info("Out AdvanceSalaryService getAdvanceSalaryByUserId");
         return new CommonResponse<>(advanceSalaryDTOList, "User Advance Salary List fetched successfully");
     }

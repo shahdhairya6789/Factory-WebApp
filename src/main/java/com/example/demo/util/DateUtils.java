@@ -1,9 +1,16 @@
 package com.example.demo.util;
 
+import com.example.demo.models.dto.SalaryRequestDTO;
+
 import java.sql.Timestamp;
 import java.time.*;
 
 public class DateUtils {
+
+    private DateUtils() {
+        // Private constructor to prevent instantiation
+    }
+
     public static Timestamp getEndOfDayTimestamp(long epochSeconds) {
         // Convert epochSeconds to Instant (UTC)
         Instant instant = Instant.ofEpochSecond(epochSeconds);
@@ -32,5 +39,17 @@ public class DateUtils {
 
         // Convert to Timestamp
         return Timestamp.valueOf(startOfDayIST);
+    }
+
+    public static DateRecord getDateRecord(SalaryRequestDTO generateSalaryRequestDTO) {
+        Timestamp startDate = Timestamp.valueOf(LocalDateTime.of(generateSalaryRequestDTO.getYear(), generateSalaryRequestDTO.getMonth(), 1, 0, 0));
+        YearMonth yearMonth = YearMonth.of(generateSalaryRequestDTO.getYear(), generateSalaryRequestDTO.getMonth());
+        LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(23, 59, 59);
+        Timestamp endDate = Timestamp.valueOf(endOfMonth);
+        Timestamp currentDate = Timestamp.from(Instant.now());
+        return new DateRecord(startDate, endDate, currentDate);
+    }
+
+    public static record DateRecord(Timestamp startDate, Timestamp endDate, Timestamp currentDate) {
     }
 }

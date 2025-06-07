@@ -1,5 +1,6 @@
 package com.example.demo.models.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,10 +21,11 @@ public class AdvanceSalaryDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long advanceSalaryDate = null;
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty("userName")
     private String userName = null;
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty("paidByUserName")
     private String paidByUserName = null;
-
     public AdvanceSalaryDTO(int userId, int advanceSalaryAmount, int paidByUserId) {
         this.userId = userId;
         this.advanceSalaryAmount = advanceSalaryAmount;
@@ -34,8 +36,8 @@ public class AdvanceSalaryDTO {
         this.userId = advanceSalary.getUser().getId();
         this.advanceSalaryAmount = advanceSalary.getAdvanceSalary();
         this.advanceSalaryDate = advanceSalary.getAdvanceSalaryDate().getTime();
-        this.paidByUserId = advanceSalary.getUser().getId();
+        this.paidByUserId = advanceSalary.getPaidByUser().getId();
         this.userName = advanceSalary.getUser().getName();
-        this.paidByUserName = advanceSalary.getUser().getName();
+        this.paidByUserName = advanceSalary.getPaidByUser().getName();
     }
 }

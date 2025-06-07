@@ -30,6 +30,8 @@ public class Payment extends AuditColumns {
     @ManyToOne
     @JoinColumn(name = "salary_type_id")
     private SalaryType salaryType;
+    private int createdBy;
+    private int modifiedBy;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

@@ -44,23 +44,48 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Integer>
             @Param("startDate") Timestamp startDate,
             @Param("endDate") Timestamp endDate);
 
-    @Query(value = "select " +
-            "    tusm.user_id as userId, " +
-            "    tusm.salary_type_id as salaryTypeId, " +
-            "    tusm.salary as monthlySalary, " +
-            "    count(distinct DATE_FORMAT(attendance_date , \"%d-%m-%Y\")) as workingDays " +
-            "from " +
-            "    tblt_user_salary_mapping tusm " +
-            "left join tblm_attendance ta on " +
-            "    tusm.user_id = ta.user_id " +
-            "    and tusm.salary_type_id = ta.salary_type_id " +
-            "where " +
-            "    tusm.user_id in (:userIds) " +
-            "    and ta.attendance_date between :startDate and :endDate " +
-            "group by  " +
-            "    tusm.user_id, " +
-            "    tusm.salary_type_id," +
-            "    tusm.salary ",
+    @Query(value = """
+            WITH ranked_attendance AS (
+                SELECT
+                    user_id,
+                    DATE(attendance_date) AS att_date,
+                    salary_type_id,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY user_id, DATE(attendance_date)
+                        ORDER BY salary_type_id DESC
+                    ) AS rn
+                FROM
+                    tblm_attendance
+                WHERE
+                    attendance_date BETWEEN :startDate AND :endDate
+                    AND user_id in (:userIds)
+            ),
+            filtered_attendance AS (
+                SELECT
+                    user_id,
+                    att_date,
+                    salary_type_id
+                FROM
+                    ranked_attendance
+                WHERE
+                    rn = 1
+            )
+            SELECT
+                fa.user_id AS userId,
+                fa.salary_type_id AS salaryTypeId,
+                tusm.salary AS monthlySalary,
+                COUNT(*) AS working_days
+            FROM
+                filtered_attendance fa
+            JOIN
+                tblt_user_salary_mapping tusm
+                ON fa.user_id = tusm.user_id
+                AND fa.salary_type_id = tusm.salary_type_id
+            GROUP BY
+                fa.user_id,
+                fa.salary_type_id,
+                tusm.salary
+            """,
             nativeQuery = true)
     List<UserSalaryAttendanceDTO> findUserSalaryAttendanceByUserId(
             @Param("userIds") Set<Integer> userIds,

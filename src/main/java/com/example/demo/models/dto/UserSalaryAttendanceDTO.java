@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserSalaryAttendanceDTO {
-    private long userId;
-    private long salaryTypeId;
-    private long monthlySalary;
-    private long workingDays;
+    private Integer userId;
+    private Integer salaryTypeId;
+    private Integer monthlySalary;
+    private Long workingDays;
 }

@@ -102,7 +102,7 @@ public class AttendanceService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Integer currentUserId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
         // Add attendance
-        Attendance attendance = new Attendance(attendanceVO, user, machine, shift, salaryType, attendanceDate, file.getSize(), filePath, currentUserId, currentUserId);
+        Attendance attendance = new Attendance(attendanceVO, user, machine, shift, salaryType, file.getOriginalFilename(), file.getSize(), filePath, currentUserId, currentUserId);
         attendance = attendanceRepository.save(attendance);
         LOGGER.info("Out AttendanceService addAttendance");
         return new CommonResponse<>(attendance, "Success");
@@ -132,7 +132,7 @@ public class AttendanceService {
         LOGGER.info("In AttendanceService getAttendanceFileData");
         Attendance attendance = attendanceRepository.findById(attendanceId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid attendance id " + attendanceId));
-        String filePath = getAttendanceFilePath(attendance.getAttendanceDate().getTime(), attendance.getUser());
+        String filePath = attendance.getAttendanceUserImagePath();
         String fileName = attendance.getAttendanceUserImageName();
         File file = new File(filePath + File.separator + fileName);
         byte[] zippedData;

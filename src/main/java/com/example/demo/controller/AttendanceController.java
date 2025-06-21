@@ -13,13 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.models.CommonResponse;
@@ -59,11 +53,12 @@ public class AttendanceController {
         return commonResponse;
     }
 
+    @PreAuthorize("hasAnyAuthority('MERCHANT', 'EMPLOYEE', 'ADMIN')")
     @GetMapping(
-            value = "/attendance-image",
+            value = "/image/{attendanceId}",
             produces = "application/octet-stream"
     )
-    public ResponseEntity<byte[]> getAttendancePicById(@RequestParam Integer attendanceId) {
+    public ResponseEntity<byte[]> getAttendancePicById(@PathVariable(name = "attendanceId") Integer attendanceId) {
         LOGGER.info("In AttendanceController getAttendancePicById");
         ResponseEntity<byte[]> responseEntity = attendanceService.getAttendanceFileData(attendanceId);
         LOGGER.info("In AttendanceController getAttendancePicById");

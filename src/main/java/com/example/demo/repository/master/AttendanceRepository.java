@@ -19,7 +19,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Integer>
 
     @Query(value =
             "SELECT " +
-                    " a.id AS attendanceId, " +
+                    " a.id, " +
                     " UNIX_TIMESTAMP(a.attendance_date) AS attendanceDate, " +                    " a.production as production, " +
                     " a.dhaga as dhaga, " +
                     " a.frames as frames, " +
@@ -46,46 +46,44 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Integer>
 
     @Query(value = """
             WITH ranked_attendance AS (
-                SELECT
-                    user_id,
-                    DATE(attendance_date) AS att_date,
-                    salary_type_id,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY user_id, DATE(attendance_date)
-                        ORDER BY salary_type_id DESC
-                    ) AS rn
-                FROM
-                    tblm_attendance
-                WHERE
-                    attendance_date BETWEEN :startDate AND :endDate
-                    AND user_id in (:userIds)
+              SELECT
+                user_id,
+                salary_type_id,
+                ROW_NUMBER() OVER (
+                  PARTITION BY user_id, DATE(attendance_date)
+                  ORDER BY salary_type_id DESC
+                ) AS rn
+              FROM
+                tblm_attendance
+              WHERE
+                attendance_date BETWEEN :startDate AND :endDate
+                AND user_id IN (:userIds)
             ),
             filtered_attendance AS (
-                SELECT
-                    user_id,
-                    att_date,
-                    salary_type_id
-                FROM
-                    ranked_attendance
-                WHERE
-                    rn = 1
+              SELECT
+                user_id,
+                salary_type_id
+              FROM ranked_attendance
+              WHERE rn = 1
             )
             SELECT
-                fa.user_id AS userId,
-                fa.salary_type_id AS salaryTypeId,
-                tusm.salary AS monthlySalary,
-                COUNT(*) AS working_days
+              tu.id AS userId,
+              tusm.salary_type_id AS salaryTypeId,
+              tusm.salary AS monthlySalary,
+              COUNT(fa.user_id) AS workingDays
             FROM
-                filtered_attendance fa
-            JOIN
-                tblt_user_salary_mapping tusm
-                ON fa.user_id = tusm.user_id
-                AND fa.salary_type_id = tusm.salary_type_id
+              tblm_user tu
+            LEFT JOIN tblt_user_salary_mapping tusm ON tu.id = tusm.user_id
+            LEFT JOIN filtered_attendance fa
+              ON tu.id = fa.user_id
+              AND fa.salary_type_id = tusm.salary_type_id
+            WHERE
+              tu.id IN (:userIds)
             GROUP BY
-                fa.user_id,
-                fa.salary_type_id,
-                tusm.salary
-            """,
+              tu.id,
+              tusm.salary_type_id,
+              tusm.salary
+    """,
             nativeQuery = true)
     List<UserSalaryAttendanceDTO> findUserSalaryAttendanceByUserId(
             @Param("userIds") Set<Integer> userIds,

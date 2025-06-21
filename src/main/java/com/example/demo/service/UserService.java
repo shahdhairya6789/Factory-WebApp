@@ -17,9 +17,13 @@ public interface UserService {
 
     CommonResponse<Map<String, Object>> verify(VerifyOtpRequestObject verifyOtpRequestObject);
 
+    CommonResponse<Map<String, Object>> verify(VerifyOtpMobileNumberRequestObject verifyOtpMobileNumberRequestObject);
+
     CommonResponse<User> resetPassword(int userId, String password);
 
     CommonResponse<String> resendOtp(int userId);
+
+    CommonResponse<String> resendOtp(String mobileNumber);
 
     CommonResponse<List<String>> getRoles();
 

@@ -30,7 +30,7 @@ public class User extends AuditColumns {
     private String name;
     @JsonIgnore
     private String password;
-    private boolean isActive;
+    private int isActive;
     private String email;
     private String mobileNumber;
     private String loginToken;

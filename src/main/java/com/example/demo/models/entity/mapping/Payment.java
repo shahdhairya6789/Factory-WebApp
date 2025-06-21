@@ -22,10 +22,10 @@ public class Payment extends AuditColumns {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private int advancePayment;
-    private int paymentAmount;
+    private Long advancePayment = 0L;
+    private Long paymentAmount;
     private Timestamp paymentDate;
-    private int workingDays;
+    private Integer workingDays;
     private boolean isActive;
     @ManyToOne
     @JoinColumn(name = "salary_type_id")

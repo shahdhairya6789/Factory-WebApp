@@ -47,11 +47,27 @@ public class AuthController {
         return commonResponse;
     }
 
+    @PostMapping("/verify-otp/mobileNumber")
+    public CommonResponse<Map<String, Object>> verifyOtpMobileNumber(@RequestBody VerifyOtpMobileNumberRequestObject verifyOtpMobileNumberRequestObject) {
+        LOGGER.debug("In AuthController::verifyOtp for userID {}", verifyOtpMobileNumberRequestObject.getMobileNumber());
+        CommonResponse<Map<String, Object>> commonResponse = userService.verify(verifyOtpMobileNumberRequestObject);
+        LOGGER.debug("Out AuthController::verifyOtp");
+        return commonResponse;
+    }
+
     @PostMapping("/register")
     public CommonResponse<User> register(@RequestBody SignUpSelfRequest signUpSelfRequest) {
         LOGGER.debug("In AuthController::register for email {}", signUpSelfRequest.getEmail());
         CommonResponse<User> commonResponse = userService.register(signUpSelfRequest);
         LOGGER.debug("Out AuthController::register");
+        return commonResponse;
+    }
+
+    @GetMapping("/user/{mobileNumber}/resend-otp")
+    public CommonResponse<String> resendOtp(@PathVariable("mobileNumber") String mobileNumber) {
+        LOGGER.debug("In AuthController::resendOtp for userID {}", mobileNumber);
+        CommonResponse<String> commonResponse = userService.resendOtp(mobileNumber);
+        LOGGER.debug("Out AuthController::resendOtp");
         return commonResponse;
     }
 

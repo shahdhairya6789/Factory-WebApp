@@ -42,7 +42,8 @@ public class UncaughtExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleIllegalArgumentException(RuntimeException ex, WebRequest request) {
         LOGGER.error("UncaughtExceptionHandler.handleIllegalArgumentExceptions Error:{}", ExceptionUtils.getStackTrace(ex), ex);
         String requestURI = ((ServletWebRequest) request).getRequest().getRequestURI();
-        if (StringUtils.isNotBlank(requestURI) && requestURI.toLowerCase().contains("/v1")) {
+        if (StringUtils.isNotBlank(requestURI) && (requestURI.toLowerCase().contains("/v1") || requestURI.toLowerCase().contains("/auth"))) {
+            System.out.println(ex.getMessage());
             CommonResponse.ErrorObject errorObject = new CommonResponse.ErrorObject(ex.getMessage(), request.getDescription(false), HttpStatus.UNPROCESSABLE_ENTITY);
             return new ResponseEntity<>(new CommonResponse<>(errorObject), HttpStatus.UNPROCESSABLE_ENTITY);
         } else {

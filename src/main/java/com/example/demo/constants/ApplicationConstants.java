@@ -23,7 +23,7 @@ public class ApplicationConstants {
         public static final String MACHINE_DELETED_SUCCESSFULLY = "Machine details deleted successfully!";
         public static final String ROLES_FETCHED_SUCCESSFULLY = "Roles fetch successfully!";
         public static final String EMPLOYEE_FETCHED_SUCCESSFULLY = "Employee fetched successfully!";
-        public static final String USER_UPDATED_SUCCESSFULLY = "User fetched successfully!";
+        public static final String USER_UPDATED_SUCCESSFULLY = "User updated successfully!";
 
     }
 
@@ -53,6 +53,8 @@ public class ApplicationConstants {
 
     public static class ErrorMessage {
         public static final String USER_NOT_FOUND = "User not found!";
+        public static final String USER_IS_NOT_ACTIVE = "User is not active!";
+        public static final String USER_IS_DISABLED = "User is disabled!";
         public static final String INVALID_CREDENTIALS = "Either username or password is incorrect!";
         public static final String TOKEN_EXPIRED = "Token has expired!";
         public static final String UNMATCHED_OTP = "Invalid OTP!";

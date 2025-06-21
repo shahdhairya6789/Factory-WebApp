@@ -61,6 +61,7 @@ public class Attendance extends AuditColumns {
         this.attendanceDate = new Timestamp(attendanceVO.getAttendanceDate()* 1000L);
         this.production = attendanceVO.getProduction();
         this.dhaga = attendanceVO.getDhaga();
+        this.frames = attendanceVO.getFrames();
         this.user = user;
         this.machine = machine;
         this.shift = shift;

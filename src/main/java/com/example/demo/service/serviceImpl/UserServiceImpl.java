@@ -31,9 +31,7 @@ import com.example.demo.service.UserService;
 import com.example.demo.util.CommonUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.example.demo.constants.ApplicationConstants.ErrorMessage.INVALID_CREDENTIALS;
-import static com.example.demo.constants.ApplicationConstants.ErrorMessage.UNMATCHED_OTP;
-import static com.example.demo.constants.ApplicationConstants.ErrorMessage.USER_NOT_FOUND;
+import static com.example.demo.constants.ApplicationConstants.ErrorMessage.*;
 
 @Service
 //@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
@@ -96,6 +94,7 @@ public class UserServiceImpl implements UserService {
         if (optionalUser.isPresent()) {
             user = optionalUser.get();
             message = ApplicationConstants.SuccessMessage.USER_ALREADY_EXISTS;
+            return new CommonResponse<>(null, message);
         } else {
             User manager = userRepository.findById(signUpRequestObject.getManagerId()).orElse(null);
             if (Objects.isNull(manager)) {
@@ -122,7 +121,7 @@ public class UserServiceImpl implements UserService {
                     .name(signUpRequestObject.getName())
                     .manager(manager)
                     .otp(String.valueOf(otp))
-                    .isActive(true)
+                    .isActive(2)
                     .roles(role)
                     .createdBy(manager.getId())
                     .modifiedBy(manager.getId())
@@ -169,7 +168,7 @@ public class UserServiceImpl implements UserService {
                     .name(signUpSelfRequest.getName())
                     .manager(null)
                     .otp(String.valueOf(otp))
-                    .isActive(true)
+                    .isActive(2)
                     .roles(role)
                     .createdBy(-1)
                     .modifiedBy(-1)
@@ -231,6 +230,33 @@ public class UserServiceImpl implements UserService {
         }
         String authenticationToken = jwtService.generateToken(user.getMobileNumber(), roles.stream().map(Role::getName).collect(Collectors.toList()));
         user.setLoginToken(authenticationToken);
+        user.setIsActive(1);
+        user = userRepository.save(user);
+        HashMap<String, Object> responseMap = new HashMap<>();
+        responseMap.put("token", authenticationToken);
+        responseMap.put("expires_in", System.currentTimeMillis() + jwtExpiration);
+        responseMap.put("expires_at", new Date(System.currentTimeMillis() + jwtExpiration));
+        responseMap.put("user", user);
+
+        LOGGER.debug("Out UserServiceImpl::verify");
+        return new CommonResponse<>(responseMap, ApplicationConstants.SuccessMessage.USER_VERIFIED);
+    }
+
+    @Override
+    public CommonResponse<Map<String, Object>> verify(VerifyOtpMobileNumberRequestObject verifyOtpMobileNumberRequestObject) {
+        LOGGER.debug("In UserServiceImpl::verify");
+        Optional<User> userOptional = userRepository.findByMobileNumber(verifyOtpMobileNumberRequestObject.getMobileNumber());
+        if (userOptional.isEmpty()) {
+            throw new IllegalArgumentException(USER_NOT_FOUND);
+        }
+        User user = userOptional.get();
+        Set<Role> roles = user.getRoles();
+        if (CommonUtils.checkValueAbsent(user.getOtp(), String.valueOf(verifyOtpMobileNumberRequestObject.getOtp()))) {
+            throw new IllegalArgumentException(UNMATCHED_OTP);
+        }
+        String authenticationToken = jwtService.generateToken(user.getMobileNumber(), roles.stream().map(Role::getName).collect(Collectors.toList()));
+        user.setLoginToken(authenticationToken);
+        user.setIsActive(1);
         user = userRepository.save(user);
         HashMap<String, Object> responseMap = new HashMap<>();
         responseMap.put("token", authenticationToken);
@@ -261,6 +287,9 @@ public class UserServiceImpl implements UserService {
         User user = userOptional.get();
         Set<Role> roles = user.getRoles();
 
+        if(user.getIsActive() != 1){
+            throw new IllegalArgumentException(USER_IS_NOT_ACTIVE);
+        }
         // validate if the password matches
         if (!bCryptPasswordEncoder.matches(signinRequest.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException(INVALID_CREDENTIALS);
@@ -281,12 +310,38 @@ public class UserServiceImpl implements UserService {
         if (userOptional.isEmpty()) {
             throw new IllegalArgumentException(USER_NOT_FOUND);
         }
+
+        if (userOptional.get().getIsActive() != 2 || userOptional.get().getIsActive() != 1) {
+            throw new IllegalArgumentException(USER_IS_DISABLED);
+        }
+
         int otp = CommonUtils.generateOTP();
         User user = userOptional.get();
         user.setOtp(String.valueOf(otp));
         sendSMS.sendSms(user.getMobileNumber(), otp);
         userRepository.save(user);
         LOGGER.debug("Out UserServiceImpl::resendOtp for user-identification {}", userId);
+        return new CommonResponse<>(ApplicationConstants.SuccessMessage.OTP_SENT_AGAIN);
+    }
+
+    @Override
+    public CommonResponse<String> resendOtp(String mobileNumber) {
+        LOGGER.debug("In UserServiceImpl::resendOtp for user-identification {}", mobileNumber);
+        Optional<User> userOptional = userRepository.findByMobileNumber(mobileNumber);
+        if (userOptional.isEmpty()) {
+            throw new IllegalArgumentException(USER_NOT_FOUND);
+        }
+
+        if (!(userOptional.get().getIsActive() == 2 || userOptional.get().getIsActive() == 1)) {
+            throw new IllegalArgumentException(USER_IS_DISABLED);
+        }
+
+        int otp = CommonUtils.generateOTP();
+        User user = userOptional.get();
+        user.setOtp(String.valueOf(otp));
+        sendSMS.sendSms(user.getMobileNumber(), otp);
+        userRepository.save(user);
+        LOGGER.debug("Out UserServiceImpl::resendOtp for user-identification {}", mobileNumber);
         return new CommonResponse<>(ApplicationConstants.SuccessMessage.OTP_SENT_AGAIN);
     }
 
@@ -328,7 +383,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException(USER_NOT_FOUND);
         }
         User user = userOptional.get();
-        user.setActive(false);
+        user.setIsActive(0);
         userRepository.save(user);
         LOGGER.debug("Out UserServiceImpl::deleteUser");
         return new CommonResponse<>(ApplicationConstants.SuccessMessage.USER_DELETED_SUCCESSFULLY);
@@ -337,7 +392,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public CommonResponse<ValidUsername> validUsername(String username) {
         LOGGER.debug("In UserServiceImpl::validUsername for user-identification {}", username);
-        boolean validUser = userRepository.existsByMobileNumberAndIsActive(username, true);
+        boolean validUser = userRepository.existsByMobileNumberAndIsActive(username, 1);
         LOGGER.debug("Out UserServiceImpl::validUsername");
         return new CommonResponse<>(new ValidUsername(validUser), null);
     }

@@ -37,6 +37,7 @@ import com.example.demo.repository.mapping.AdvanceSalaryRepository;
 import com.example.demo.repository.mapping.PaymentRepository;
 import com.example.demo.repository.master.AttendanceRepository;
 import com.example.demo.repository.master.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SalaryService {
@@ -72,15 +73,17 @@ public class SalaryService {
         Map<Long, BigDecimal> userIdToAdvancePaymentMap = advanceSalaryRepository.fetchAdvanceSalaryForUsersBetweenStartAndEndDate(userIdToUser.keySet(), result.startDate(), result.endDate()).stream().collect(Collectors.toMap(UserAdvanceSalaryDTO::getUserId, UserAdvanceSalaryDTO::getAdvanceSalaryAmount));
         List<Payment> paymentList = new ArrayList<>();
         for (UserSalaryAttendanceDTO userSalaryAttendanceDTO : userSalaryAttendanceDTOList) {
-            int paymentAmount = (int) (userSalaryAttendanceDTO.getMonthlySalary() * userSalaryAttendanceDTO.getWorkingDays());
+
+            Long paymentAmount = userSalaryAttendanceDTO.getMonthlySalary() * userSalaryAttendanceDTO.getWorkingDays();
             Payment payment = new Payment();
-            payment.setSalaryType(salaryTypeIdToSalaryTypeObject.get((int) userSalaryAttendanceDTO.getSalaryTypeId()));
+            SalaryType salaryType = salaryTypeIdToSalaryTypeObject.get(userSalaryAttendanceDTO.getSalaryTypeId());
+            payment.setSalaryType(salaryType);
             payment.setPaymentDate(result.endDate());
-            payment.setWorkingDays((int) userSalaryAttendanceDTO.getWorkingDays());
-            payment.setUser(userIdToUser.get((int) userSalaryAttendanceDTO.getUserId()));
+            payment.setWorkingDays(Math.toIntExact(userSalaryAttendanceDTO.getWorkingDays()));
+            payment.setUser(userIdToUser.get(userSalaryAttendanceDTO.getUserId()));
             payment.setPaymentAmount(paymentAmount);
             if (userSalaryAttendanceDTO.getSalaryTypeId() == SalaryType.SalaryTypeValues.ONE_MACHINE.getId()) {
-                int advanceSalary = userIdToAdvancePaymentMap.getOrDefault(userSalaryAttendanceDTO.getUserId(), BigDecimal.ZERO).intValue();
+                long advanceSalary = userIdToAdvancePaymentMap.getOrDefault(userSalaryAttendanceDTO.getUserId().longValue(), BigDecimal.ZERO).longValue();
                 payment.setAdvancePayment(advanceSalary);
             }
             payment.setCreatedBy(currentUserId);
@@ -154,6 +157,7 @@ public class SalaryService {
             return new CommonResponse<>(paymentList, "Salary Listed Successfully");
     }
 
+    @Transactional
     public CommonResponse<String> regenerateSalary(SalaryRequestDTO salaryRequestDTO) {
         LOGGER.debug("In SalaryService regenerateSalary");
         validateRequest(salaryRequestDTO);

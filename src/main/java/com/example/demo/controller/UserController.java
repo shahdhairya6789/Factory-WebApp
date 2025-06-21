@@ -26,15 +26,6 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN', 'EMPLOYEE', '')")
-    @GetMapping("/{userId}/resend-otp")
-    public CommonResponse<String> resendOtp(@PathVariable("userId") int userId){
-        LOGGER.debug("In AuthController::resendOtp for userID {}", userId);
-        CommonResponse<String> commonResponse = userService.resendOtp(userId);
-        LOGGER.debug("Out AuthController::resendOtp");
-        return commonResponse;
-    }
-
-    @PreAuthorize("hasAnyAuthority('MERCHANT', 'ADMIN', 'EMPLOYEE', '')")
     @PostMapping("/reset-password")
     public CommonResponse<User> resetPassword(@RequestBody ResetPassword resetPassword) {
         LOGGER.debug("In AuthController::resetPassword for userID {}", resetPassword.getUserId());

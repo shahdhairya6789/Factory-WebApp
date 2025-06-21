@@ -403,7 +403,6 @@ public class UserServiceImpl implements UserService {
         LOGGER.debug("In UserServiceImpl::getUserByManagerId for user-identification {}", managerId);
         List<User> users = userRepository.findByManagerId(managerId);
         LOGGER.debug("Out UserServiceImpl::getUserByManagerId: {}", managerId);
-        LOGGER.info("user: {}", users);
         return new CommonResponse<>(users, ApplicationConstants.SuccessMessage.USER_LIST_FETCHED_SUCCESSFULLY);
     }
 

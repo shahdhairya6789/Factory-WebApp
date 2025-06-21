@@ -41,7 +41,8 @@ public class SendSMS {
             rd.close();
 
         } catch (Exception e) {
-            System.out.println("Error SMS " + e);
+            e.printStackTrace();
+            logger.error("Error SMS " + e);
         }
     }
 }
